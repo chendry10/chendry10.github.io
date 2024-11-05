@@ -3,7 +3,7 @@ layout: default
 ---
 
 # **CAMERON HENDRY**  
-📧 **Email**: hendryc@whitman.edu | 📞 **Phone**: 425-236-5582 | 📍 **Location**: Bothell, WA 98012
+📧 **Email**: hendryc@whitman.edu |  📍 **Location**: Washington
 
 ---
 
