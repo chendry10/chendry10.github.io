@@ -2,6 +2,8 @@
 layout: default
 ---
 
+<a href="assets/resume.pdf" download="Cameron_Hendry_Resume.pdf" class="btn btn-primary">Download PDF</a>
+
 # **CAMERON HENDRY**  
 📧 **Email**: hendryc@whitman.edu |  📍 **Location**: Washington
 
