@@ -11,7 +11,7 @@ layout: default
 ---
 
 ##Google Location Data
-{% include relative fig.html$}
+{% include_relative fig.html %}
 
 ## 🎓 **Education**  
 **Whitman College**, Walla Walla, WA  
