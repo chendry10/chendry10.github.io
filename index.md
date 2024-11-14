@@ -10,9 +10,6 @@ layout: default
 
 ---
 
-##Google Location Data
-{% include_relative fig.html %}
-
 ## 🎓 **Education**  
 **Whitman College**, Walla Walla, WA  
 **Bachelor of Arts** in Computer Science  
