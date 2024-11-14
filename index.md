@@ -3,7 +3,7 @@ layout: default
 ---
 
 <div style="text-align: center; margin-top: 20px;">
-  <a href="assets/resume.pdf" download="Resume.pdf" class="btn btn-primary" style="padding: 10px 20px; font-size: 16px;">Download PDF</a>
+  <a href="assets/Resume.pdf" download="Resume.pdf" class="btn btn-primary" style="padding: 10px 20px; font-size: 16px;">Download PDF</a>
 </div>
 # **CAMERON HENDRY**  
 📧 **Email**: hendryc@whitman.edu |  📍 **Location**: Washington
