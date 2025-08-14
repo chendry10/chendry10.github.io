@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Cameron Hendry — Portfolio</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Cameron Hendry — CS @ Whitman ’27. SWE/ML projects and experience.">
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,sans-serif;margin:0;background:#0b0b0c;color:#f3f4f6}
+    .wrap{max-width:920px;margin:0 auto;padding:28px}
+    header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+    .name{font-size:1.6rem;font-weight:700}
+    .links a{color:#93c5fd;text-decoration:none;margin-right:14px}
+    h2{margin-top:28px;border-top:1px solid #1f2937;padding-top:18px}
+    .grid{display:grid;grid-template-columns:1fr;gap:16px}
+    @media (min-width:760px){.grid{grid-template-columns:1fr 1fr}}
+    .card{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:16px}
+    .card h3{margin:6px 0 8px}
+    .meta{font-size:.9rem;color:#9ca3af}
+    .tags{margin-top:8px;font-size:.85rem;color:#a1a1aa}
+    .tags span{border:1px solid #374151;border-radius:999px;padding:2px 8px;margin-right:6px;display:inline-block;margin-top:6px}
+    .footer{margin-top:30px;font-size:.9rem;color:#9ca3af}
+    .btn{display:inline-block;margin-top:10px;border:1px solid #374151;border-radius:10px;padding:6px 10px;color:#e5e7eb;text-decoration:none}
+    a.btn:hover{background:#0f172a}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="name">Cameron Hendry</div>
+      <div class="links">
+        <a href="mailto:cameron.hendry@hotmail.com">Email</a>
+        <a href="https://www.linkedin.com/in/cameron-hendry-6560a6336/">LinkedIn</a>
+        <a href="https://github.com/chendry10">GitHub</a>
+        <a href="Cameron_Hendry_Resume.pdf">Resume</a>
+      </div>
+    </header>
+
+    <p>CS @ Whitman ’27. I build useful automations and ML-powered tools.
+       Recent work: productionized an email service that sends ~20 personalized messages/day
+       (saving ~1 hr/day), and an automated Instagram poster with robust fallbacks.</p>
+
+    <h2>Projects</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Automated AI Instagram Poster</h3>
+        <div class="meta">Python · Instagram Graph API · OpenAI API · GitHub Actions</div>
+        <p>Generates an image + caption and posts automatically. Uses GPT-5 for prompt
+           diversification with safe fallbacks; retries/backoff; Pillow preprocessing to 1080×1080.</p>
+        <div class="tags"><span>1080×1080</span><span>Retries/Backoff</span><span>Idempotent</span></div>
+        <a class="btn" href="https://github.com/chendry10/cs-portfolio">Code</a>
+      </div>
+
+      <div class="card">
+        <h3>Flappy Bird AI</h3>
+        <div class="meta">Python · Pygame · NumPy</div>
+        <p>Genetic algorithm evolves a lightweight NN to play Flappy Bird. Visual demo and
+           headless fast training; randomized pipes; tuned hitboxes and UI; persistent high score.</p>
+        <div class="tags"><span>GA</span><span>Neural Net</span><span>Headless Mode</span></div>
+        <a class="btn" href="https://github.com/chendry10/cs-portfolio">Code</a>
+      </div>
+    </div>
+
+    <h2>Experience highlight</h2>
+    <div class="card">
+      <h3>Williams Investments — Software Design & Data Science Intern</h3>
+      <p>Email service automation (Quick Lease Pro) with webhooks, rate limiting, exponential backoff,
+         and structured JSON logs. ~20 emails/day; ~1 hr/day phone time saved. Built a lease duration
+         model (scikit-learn/XGBoost) with leakage checks and CV.</p>
+    </div>
+
+    <h2>Skills</h2>
+    <div class="card">
+      Python, Java · Pandas, NumPy, scikit-learn, XGBoost · Pillow, Matplotlib, Pygame ·
+      Git, GitHub Actions, Selenium, Jupyter · Instagram Graph API, OpenAI API, Quick Lease Pro
+    </div>
+
+    <div class="footer">Last updated: 2025-08-14</div>
+  </div>
+</body>
+</html>
