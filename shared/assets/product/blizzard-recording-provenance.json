@@ -1,0 +1,41 @@
+{
+  "source": "Actual Typing Agent Blizzard Defense frontend, captured locally through normal game controls",
+  "sourcePath": "modules/student/views/blizzard-defense/index.html",
+  "sourceSha256": "28a7d8506acf722260ace3e7fd88813e4bc116887750f0804f3880856bd2084e",
+  "capture": {
+    "nativeWidth": 1920,
+    "nativeHeight": 1080,
+    "method": "Direct CUA browser viewport capture with native per-letter typing and steady frame pacing; no settling waits in the capture loop",
+    "encodedFrameRate": 30,
+    "durationSeconds": 10.7,
+    "sound": false,
+    "note": "No game-state injection, generated UI, private student/account data, production calls, retouching or upscaling. Product footage illustrates the adjacent scoped contribution; not backend or sole-authorship proof.",
+    "storm": 9,
+    "posterSourceFrame": 355,
+    "maxSelectedCaptureGapMs": 50,
+    "gapsOver100ms": 0,
+    "colorEncoding": "BT.709 limited-range YUV420p H.264"
+  },
+  "assets": [
+    {
+      "file": "blizzard-defense-play.mp4",
+      "bytes": 1803303,
+      "sha256": "81e466b13cfa87fa01c211f18de6ac771884571f7425a858845786179c2ae93f"
+    },
+    {
+      "file": "blizzard-defense-play-1280.mp4",
+      "bytes": 778779,
+      "sha256": "aa7fed853ea913d4c88ee34105ccb53cbdc4fc808b36e764cb533ed864ec43d9"
+    },
+    {
+      "file": "blizzard-defense-play-poster.webp",
+      "bytes": 55816,
+      "sha256": "fab9bf538e88a1e56d71a7cfde388ca4464eb55f85609e00fac24c4bede3d570"
+    },
+    {
+      "file": "blizzard-defense-play-poster-1280.webp",
+      "bytes": 27606,
+      "sha256": "fdc76fe821a109e9bddd4f4abcba8a835012914dd0fb8134e635615a855271df"
+    }
+  ]
+}

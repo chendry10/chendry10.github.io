@@ -1,0 +1,19 @@
+/* One large real paper remains the focal object across adjacent chapters. */
+.score-journey{position:fixed;inset:0;z-index:24;pointer-events:none;opacity:0;overflow:clip;contain:layout paint;isolation:isolate}
+.score-journey-stage{position:absolute;left:0;top:0;perspective:1500px;transform-origin:0 0}
+.score-journey-track{position:absolute;left:0;top:0;transform-origin:0 0;transform-style:preserve-3d}
+.score-journey .score-journey-sheet{position:relative;width:100%;margin:0;transform-origin:50% 68%;backface-visibility:hidden}
+.score-journey .score-journey-sheet>img{display:block;width:100%;height:auto;aspect-ratio:2200/1700;object-fit:contain;border:0;background:var(--paper,#fff);box-shadow:none}
+.score-journey .score-journey-sheet:after{content:"";position:absolute;inset:0 0 auto;height:auto;aspect-ratio:2200/1700;border:1px solid #ffffff90;pointer-events:none}
+.score-journey-shadow{position:absolute;left:0;top:0;width:100%;aspect-ratio:2200/1700;box-shadow:9px 25px 38px #02061088,1px 3px 5px #02061055;pointer-events:none;z-index:-1}
+.score-journey .score-paper figcaption{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:34px;padding-top:12px;color:var(--ink);line-height:1.5}
+.score-journey .score-paper figcaption span{font-size:13px;font-weight:500;white-space:nowrap}
+.score-journey .score-paper small{font-size:11px;color:var(--muted);white-space:nowrap}
+html.concerto-motion .lyre-optical-window .hero-score{transform:none}
+html.concerto-motion .lyre-optical-window .hero-score>img{max-height:none;aspect-ratio:2200/1700;object-fit:contain}
+html.concerto-motion .lyre-optical-window .hero-score>div{transform:none}
+.score-journey-targeted [data-reading-area="1"] .ld-arrival{animation:none!important}
+.score-journey-targeted [data-reading-area="1"] img{transition:none!important}
+html.motion-off .score-journey,html.concerto-still .score-journey{display:none}
+@media(max-width:760px){.score-journey{display:none}}
+@media(prefers-reduced-motion:reduce){.score-journey{display:none}}

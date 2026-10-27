@@ -1,98 +1,60 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Cameron Hendry — Portfolio</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Cameron Hendry — CS @ Whitman ’27. Automation & ML projects. Email service (~20/day, ~1 hr/day saved) and automated Instagram poster.">
+<!doctype html><html lang="en" data-motion-driver="concerto"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080e21"><title>Cameron Hendry | Software Engineer</title><meta name="description" content="Cameron Hendry — full-stack software engineer building production learning software at Typing Agent and Yeti Academy, and co-founder of LyreLink."><link rel="canonical" href="https://chendry10.github.io/">
+<link rel="icon" href="/shared/assets/favicon.svg" type="image/svg+xml"><link rel="preload" href="/shared/assets/fonts/dm-sans.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/shared/assets/photography/keyboard-blue-3840.webp" as="image" imagesrcset="/shared/assets/photography/keyboard-blue-1920.webp 1920w, /shared/assets/photography/keyboard-blue-3840.webp 3840w" imagesizes="100vw" media="(min-width:701px)"><link rel="preload" href="/shared/assets/photography/keyboard-blue-1440.webp" as="image" media="(max-width:700px)">
+<link rel="stylesheet" href="/shared/vendor/scrollcraft.css"><link rel="stylesheet" href="/shared/common.css"><link rel="stylesheet" href="/shared/lyre-demo.css"><link rel="stylesheet" href="/shared/key-scene.css"><link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./enhance.css"><link rel="stylesheet" href="./score-folio.css"><link rel="stylesheet" href="./score-journey.css">
+<script>document.documentElement.classList.add('fonts-pending');setTimeout(()=>document.documentElement.classList.remove('fonts-pending'),2200)</script><script type="module" src="/shared/common.js"></script><script type="module" src="./motion.js"></script>
+</head><body>
+<a class="skip-link" href="#education">Skip to selected work</a>
+<header class="site-header"><a class="monogram" href="#top" aria-label="Cameron Hendry, back to top">CH<span>.</span></a><nav aria-label="Main navigation"><a href="#education">Work</a><a href="/shared/assets/Cameron-Hendry-Resume.pdf" target="_blank" rel="noopener">Resume ↗</a><a href="#contact">Contact</a><button type="button" data-motion-toggle>Motion on</button></nav></header>
+<main>
+  <section id="top" class="concerto-opening" data-sc-act="pin" data-sc-span="3" aria-labelledby="identity-title"><div class="concerto-stage" data-sc-stage>
+    <div class="typing-plane"><div class="typing-camera"><picture><source media="(max-width:700px)" srcset="/shared/assets/photography/keyboard-blue-1440.webp"><img src="/shared/assets/photography/keyboard-blue-3840.webp" srcset="/shared/assets/photography/keyboard-blue-1920.webp 1920w, /shared/assets/photography/keyboard-blue-3840.webp 3840w" sizes="100vw" width="3840" height="2560" fetchpriority="high" alt="Katharina Gloth's macro photograph of a real mechanical keyboard with blue-lit switches and textured black keycaps"></picture></div></div>
+    <figure class="hero-software"><div class="hero-software-viewport"><img src="/shared/assets/product/battleship-detail.webp" srcset="/shared/assets/product/battleship-detail-mobile.webp 1200w, /shared/assets/product/battleship-detail.webp 1800w" sizes="(max-width:700px) 57vw, 440px" width="1800" height="1420" fetchpriority="high" alt="Actual Typing Agent Captain Salvo practice boards, cropped directly from the full local capture"></div><figcaption>Typing Battleship / Local Captain Salvo practice</figcaption></figure>
+    <div class="identity-scrim" aria-hidden="true"></div><div class="hero-identity"><p class="role-line">Contract Full-Stack Software Engineer <br><span>Typing Agent &amp; Yeti Academy</span></p><h1 id="identity-title">Cameron <br>Hendry<span>.</span></h1><p class="hero-lead">Real-time games. Durable progress. <br>Learning software built to keep working.</p><a class="primary-link" href="#education">Explore education work <span aria-hidden="true">↗</span></a></div>
+    <a class="scroll-cue" href="#keystroke">Scroll to look inside <span aria-hidden="true">↓</span></a><div class="hero-caption"><span>Contract work / March 2026 to present</span><span>Keyboard photography. Actual software shown above.</span></div>
 
-  <!-- Favicon (emoji) -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
-
-  <!-- Open Graph / Twitter -->
-  <meta property="og:title" content="Cameron Hendry — SWE Portfolio">
-  <meta property="og:description" content="Automation & ML projects. Email service (~20/day, ~1 hr/day saved) and an automated Instagram poster with robust fallbacks.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://chendry10.github.io/">
-  <!-- Optional: add a preview image later and uncomment -->
-  <!-- <meta property="og:image" content="https://chendry10.github.io/preview.png"> -->
-  <meta name="twitter:card" content="summary_large_image">
-
-  <!-- Privacy-friendly analytics (remove if not wanted) -->
-  <script defer data-domain="chendry10.github.io" src="https://plausible.io/js/script.js"></script>
-
-  <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,sans-serif;margin:0;background:#0b0b0c;color:#f3f4f6}
-    .wrap{max-width:920px;margin:0 auto;padding:28px}
-    header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
-    .name{font-size:1.6rem;font-weight:700}
-    .links a{color:#93c5fd;text-decoration:none;margin-right:14px}
-    h2{margin-top:28px;border-top:1px solid #1f2937;padding-top:18px}
-    .grid{display:grid;grid-template-columns:1fr;gap:16px}
-    @media (min-width:760px){.grid{grid-template-columns:1fr 1fr}}
-    .card{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:16px}
-    .card h3{margin:6px 0 8px}
-    .meta{font-size:.9rem;color:#9ca3af}
-    .tags{margin-top:8px;font-size:.85rem;color:#a1a1aa}
-    .tags span{border:1px solid #374151;border-radius:999px;padding:2px 8px;margin-right:6px;display:inline-block;margin-top:6px}
-    .footer{margin-top:30px;font-size:.9rem;color:#9ca3af}
-    .btn{display:inline-block;margin-top:10px;border:1px solid #374151;border-radius:10px;padding:6px 10px;color:#e5e7eb;text-decoration:none}
-    a.btn:hover{background:#0f172a}
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <header>
-      <div class="name">Cameron Hendry</div>
-      <div class="links">
-        <a href="mailto:cameron.hendry@hotmail.com">Email</a>
-        <a href="https://www.linkedin.com/in/cameron-hendry-6560a6336/" target="_blank" rel="noopener">LinkedIn</a>
-        <a href="https://github.com/chendry10" target="_blank" rel="noopener">GitHub</a>
-        <a href="Cameron_Hendry_Resume.pdf" target="_blank" rel="noopener">Resume</a>
-      </div>
-    </header>
-
-    <p>CS @ Whitman ’27. I build useful automations and ML-powered tools.
-       Recent work: productionized an email service that sends ~20 personalized messages/day
-       (saving ~1 hr/day), and an automated Instagram poster with robust fallbacks.</p>
-
-    <h2>Projects</h2>
-    <div class="grid">
-      <div class="card">
-        <h3>Automated AI Instagram Poster</h3>
-        <div class="meta">Python · Instagram Graph API · OpenAI API · GitHub Actions</div>
-        <p>Generates an image + caption and posts automatically. Uses GPT-5 for prompt
-           diversification with safe fallbacks; retries/backoff; Pillow preprocessing to 1080×1080.</p>
-        <div class="tags"><span>1080×1080</span><span>Retries/Backoff</span><span>Idempotent</span></div>
-        <a class="btn" href="https://github.com/chendry10/cs-portfolio/tree/main/Automated_AI_Instagram" target="_blank" rel="noopener">Code</a>
-        <a class="btn" href="https://www.instagram.com/ai_memes_fun/" target="_blank" rel="noopener">Live</a>
-      </div>
-
-      <div class="card">
-        <h3>Flappy Bird AI</h3>
-        <div class="meta">Python · Pygame · NumPy</div>
-        <p>Genetic algorithm evolves a lightweight NN to play Flappy Bird. Visual demo and
-           headless fast training; randomized pipes; tuned hitboxes and UI; persistent high score.</p>
-        <div class="tags"><span>GA</span><span>Neural Net</span><span>Headless Mode</span></div>
-        <a class="btn" href="https://github.com/chendry10/cs-portfolio/tree/main/Flappy%20Bird/src" target="_blank" rel="noopener">Code</a>
-      </div>
+    <div id="keystroke" class="relay-scene" aria-label="Illustrated keypress and signal journey into an actual Typing Agent game">
+      <header class="relay-heading"><p class="project-type">Typing Agent &amp; Yeti Academy</p><h2>Inside a <br>keystroke.</h2><p>Small interactions. <br>Whole systems behind them.</p></header>
+      <div class="relay-key" aria-hidden="true"><div class="key-placeholder"><span class="placeholder-cap">A</span><i></i><i></i></div></div>
+      <svg class="relay-circuit" viewBox="0 0 1440 800" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="relay-light"><stop stop-color="#efbb74"/><stop offset="1" stop-color="#9cc5ff"/></linearGradient></defs><path class="relay-track" d="M580 520H750Q790 520 790 480V435Q790 395 830 395H1040Q1080 395 1080 435V450"/><path class="relay-current" pathLength="1" d="M580 520H750Q790 520 790 480V435Q790 395 830 395H1040Q1080 395 1080 435V450"/><circle class="relay-terminal" cx="1080" cy="450" r="8"/><g class="relay-contact"><path d="M575 509V530M585 509V530"/></g></svg>
+      <div class="relay-response-heading"><p class="project-type">Typing Agent / Actual local gameplay</p><h3>And the game responds.</h3></div><figure class="relay-product"><div class="relay-product-shell"><div class="relay-hub-crop"><img class="relay-hub" src="/shared/assets/product/blizzard-defense-hub.webp" width="1440" height="900" loading="lazy" alt="Actual Blizzard Defense game hub in Typing Agent"></div><div class="relay-game-reveal"><img class="gameplay-poster" src="/shared/assets/product/blizzard-defense-play-poster.webp" srcset="/shared/assets/product/blizzard-defense-play-poster-1280.webp 1280w, /shared/assets/product/blizzard-defense-play-poster.webp 1920w" sizes="(max-width:1050px) 86vw, 960px" width="1920" height="1080" loading="lazy" alt="Actual Blizzard Defense local gameplay with typing, target effects and combo awards"><video class="gameplay-film" data-gameplay-video data-source="/shared/assets/product/blizzard-defense-play.mp4" data-source-small="/shared/assets/product/blizzard-defense-play-1280.mp4" poster="/shared/assets/product/blizzard-defense-play-poster.webp" width="1920" height="1080" muted playsinline loop preload="none" aria-label="Recorded Blizzard Defense gameplay: typing resolves targets and awards progress"></video></div><div class="relay-impact" aria-hidden="true"></div></div><figcaption><strong>Blizzard Defense</strong><span>Recorded local gameplay / Team-built Typing Agent product</span><button class="gameplay-toggle" type="button" data-film-toggle>Pause recording</button></figcaption></figure>
+      <div class="relay-phase"><span data-relay-step="0">01 / Assemble</span><span data-relay-step="1">02 / Make contact</span><span data-relay-step="2">03 / Send the signal</span><span data-relay-step="3">04 / Play responds</span></div>
+      <p class="relay-disclosure">Authored 3D input study. My software work: reusable game integrations, real-time services and dependable progress.</p>
     </div>
+  </div></section>
 
-    <h2>Experience highlight</h2>
-    <div class="card">
-      <h3>Williams Investments — Software Design & Data Science Intern</h3>
-      <p>Email service automation (Quick Lease Pro) with webhooks, rate limiting, exponential backoff,
-         and structured JSON logs. ~20 emails/day; ~1 hr/day phone time saved. Built a lease duration
-         model (scikit-learn/XGBoost) with leakage checks and CV.</p>
-    </div>
+  <section class="job-context section-shell" data-sc-act="flow"><h2>Software for <br>real classrooms.</h2><div data-sc-in><p>My contract work covers real-time games, durable student progress, reusable integrations, and shared accessibility. The interface and the services behind it have to work together.</p><button type="button" class="text-link" data-case="production">Read the engineering case <span aria-hidden="true">↗</span></button></div></section>
 
-    <h2>Skills</h2>
-    <div class="card">
-      Python, Java · Pandas, NumPy, scikit-learn, XGBoost · Pillow, Matplotlib, Pygame ·
-      Git, GitHub Actions, Selenium, Jupyter · Instagram Graph API, OpenAI API, Quick Lease Pro
-    </div>
+  <section id="education" class="education-chapter" data-sc-act="flow" aria-labelledby="education-title"><div class="education-stage section-shell" data-sc-stage><div class="education-visual"><p class="project-type">Typing Agent &amp; Yeti Academy / Contract</p><h2 id="education-title">Behind <br>the play.</h2><div class="product-frame"><img class="product-view product-view--world" src="/shared/assets/production/typing-agent-summit-isles-world-map.jpg" width="3392" height="1472" loading="lazy" alt="Official public Typing Agent Summit Isles learning-world map"><img class="product-view product-view--arcade" src="/shared/assets/product/battleship-practice.webp" srcset="/shared/assets/product/battleship-practice-mobile.webp 1600w, /shared/assets/product/battleship-practice.webp 3840w" sizes="(max-width:700px) calc(100vw - 44px), (max-width:1050px) 52vw, 760px" width="3840" height="2088" loading="lazy" alt="Local Typing Agent Captain Salvo practice game with placed ships and practice boards"></div><p class="product-caption">Public Summit Isles map and a local Captain Salvo practice capture. Team-built software, with my selected responsibilities described alongside.</p></div><div class="caption-stack"><p class="role-date">Contract Full-Stack Software Engineer <br>March 2026 to present</p><article data-responsibility="0"><h3>Real-time, with boundaries.</h3><p>Node.js and Socket.IO lobbies for three multiplayer games, with JWT class isolation, reconnect handling, and persistent scores. Battleship rules are validated on the server to protect hidden boards.</p></article><article data-responsibility="1"><h3>Progress that survives a retry.</h3><p>MySQL receipt idempotency and bounded deadlock retries make saves dependable. Sanitized release-error monitoring supports investigation.</p></article><article data-responsibility="2"><h3>More students can participate.</h3><p>Shared accessibility, high contrast, and English/Spanish support, alongside reusable game integrations that started with Blizzard Defense.</p></article><button type="button" class="text-link" data-case="production">Read the complete case <span aria-hidden="true">↗</span></button></div></div></section>
 
-    <div class="footer">Last updated: 2025-08-14</div>
-  </div>
-</body>
-</html>
+  <section class="evidence" data-sc-act="pan" data-sc-span="2.1" aria-label="Selected production engineering evidence"><div class="evidence-stage" data-sc-stage><div class="evidence-rail" data-sc-pan="0"><div class="evidence-lead"><p class="project-type">Selected production work</p><h2>Built for <br>the next <br>interaction.</h2><p>PHP · Yii2 · MySQL · JavaScript <br>Node.js · GitHub Actions</p></div><figure class="evidence-image"><div class="gameplay-evidence-frame"><img src="/shared/assets/product/blizzard-defense-play-poster.webp" srcset="/shared/assets/product/blizzard-defense-play-poster-1280.webp 1280w, /shared/assets/product/blizzard-defense-play-poster.webp 1920w" sizes="(max-width:700px) calc(100vw - 44px), (max-width:1050px) 52vw, 760px" width="1920" height="1080" loading="lazy" alt="Actual Typing Agent Blizzard Defense recording after a boss defeat"><video class="gameplay-film" data-gameplay-video data-evidence-video data-source="/shared/assets/product/blizzard-defense-play.mp4" data-source-small="/shared/assets/product/blizzard-defense-play-1280.mp4" poster="/shared/assets/product/blizzard-defense-play-poster.webp" width="1920" height="1080" muted playsinline loop preload="none" aria-label="Real recorded Blizzard Defense gameplay"></video></div><figcaption><strong>Reusable game integrations</strong><span>Blizzard Defense, followed by eleven additional game integrations. Recorded local gameplay of Typing Agent’s team-built game; the engineering contribution is described here.</span><button class="gameplay-toggle evidence-film-toggle" type="button" data-evidence-film-toggle>Pause recording</button></figcaption></figure><article class="evidence-note"><span class="evidence-label">Real-time services</span><h3>A game room <br>is a boundary.</h3><p>Class isolation, reconnect behavior, and persistent scores belong to the service, alongside the experience students see.</p><button type="button" class="text-link" data-case="production">Read the implementation <span aria-hidden="true">↗</span></button></article><article class="evidence-note evidence-note--last"><span class="evidence-label">Verification</span><h3>Keep the <br>failure paths <br>in view.</h3><p>Bounded retries, idempotent saves, sanitized errors, and shared accessibility support the normal path by accounting for the difficult ones.</p><a class="text-link" href="https://typingagent.com" target="_blank" rel="noopener">Visit Typing Agent <span aria-hidden="true">↗</span></a><a class="text-link" href="#music">Also: LyreLink <span aria-hidden="true">↗</span></a></article></div></div></section>
+
+  <section class="lyre-interlude section-shell" data-sc-act="flow" aria-labelledby="lyre-interlude-title"><div class="lyre-interlude-heading"><h2 id="lyre-interlude-title">LyreLink</h2><p>Co-founder &amp; Software Engineer <br>July 2026 to present</p></div><div class="lyre-optical-window">
+    <div class="hero-music" aria-label="Published LyreLink demonstration score"><div class="hero-score"><img src="/shared/assets/lyrelink/victory-cornet.webp" width="2200" height="1700" alt="Victory March, B-flat cornet part, from LyreLink’s public demonstration"><div><span>LyreLink</span><p>One shared song. <br>Every musician’s part.</p></div></div></div>
+    <div class="scene-plane"><div class="scene-camera"><picture><source media="(max-width:700px)" srcset="/shared/assets/cinematic/scene-1-mobile.webp"><img src="/shared/assets/cinematic/scene-1.webp" width="1672" height="941" loading="lazy" alt="Illustrative cinematic brass trumpet, amber light, and deep cobalt optical glass"></picture></div></div>
+  </div><p class="lyre-art-note">Illustrative instrument study. The published part and working software are actual LyreLink material.</p></section>
+
+
+  <section class="score-routing" data-sc-act="pin" data-sc-span="2.15" aria-labelledby="score-routing-title"><div class="score-routing-stage" data-sc-stage>
+    <header class="score-routing-heading"><div><p class="project-type">LyreLink / Actual demonstration material</p><h2 id="score-routing-title">One song. <br>Three different parts.</h2></div><p>The director chooses the song. <br>Each player keeps their instrument.</p></header>
+    <div class="score-routing-field">
+      <svg class="score-routing-lines" viewBox="0 0 1200 420" preserveAspectRatio="none" aria-hidden="true"><path class="score-route-base" d="M600 370V325Q600 300 575 300H210V180M600 370V180M600 370V325Q600 300 625 300H990V180"/><path class="score-route-active" pathLength="1" d="M600 370V325Q600 300 575 300H210V180M600 370V180M600 370V325Q600 300 625 300H990V180"/></svg>
+      <div class="score-paper-track" data-score-part="0"><figure class="score-paper"><img src="/shared/assets/lyrelink/victory-cornet.webp" width="2200" height="1700" loading="lazy" alt="Actual published Victory March B-flat cornet part"><figcaption><span>B♭ Cornet</span><small>Victory March</small></figcaption></figure></div>
+      <div class="score-paper-track" data-score-part="1"><figure class="score-paper"><img src="/shared/assets/lyrelink/victory-clarinet.webp" width="2200" height="1700" loading="lazy" alt="Actual published Victory March B-flat clarinet part"><figcaption><span>B♭ Clarinet</span><small>Victory March</small></figcaption></figure></div>
+      <div class="score-paper-track" data-score-part="2"><figure class="score-paper"><img src="/shared/assets/lyrelink/victory-trombone.webp" width="2200" height="1700" loading="lazy" alt="Actual published Victory March trombone part"><figcaption><span>Trombone</span><small>Victory March</small></figcaption></figure></div>
+      <div class="score-director"><span>Director selection</span><strong>Victory March</strong></div>
+    </div><p class="score-routing-note">Real parts from LyreLink’s public demonstration. Try the complete director-and-members demo below.</p>
+  </div></section>
+
+  <section id="music" class="music-chapter section-shell" data-sc-act="flow" aria-labelledby="music-title">    <div class="demo-intro"><h3>Try it together.</h3><p>Victory March is ready on both phones. Choose another song or instrument to try it yourself.</p></div><div class="live-demo"><div data-lyre-demo data-initial-song="victory"><noscript><p><a href="https://lyrelink.com/about">Try the public LyreLink About demo.</a></p></noscript></div></div><p class="exhibit-note">Exact public About-page demonstration. Runs locally in your browser without a live band connection.</p>
+
+    <header class="project-heading" data-sc-in><div><p class="project-type">LyreLink / Co-founder &amp; Software Engineer</p><h2 id="music-title">The same song. <br>The right part.</h2></div><div class="project-summary"><p>Co-developed with my co-founder. <br>July 2026 to present.</p><p>A director changes the song. Each musician receives their instrument-specific part.</p><a class="text-link" href="https://lyrelink.com/about" target="_blank" rel="noopener">Visit LyreLink <span aria-hidden="true">↗</span></a></div></header>
+    <div class="music-engineering"><article data-sc-in><h3>Shared state <br>that stays useful.</h3><p>TypeScript, React, and Next.js with Ably, Redis, and Azure support the shared music experience. My work includes director setlists and PDF preparation tools.</p></article><article data-sc-in><h3>Offline practice. <br>Private boundaries.</h3><p>Up to seven days of offline practice, session- and version-scoped private PDF caches, and purge-race fixes keep an old tab from restoring a file after its session ends.</p></article><div class="music-verification" data-sc-in><span>Vitest &amp; Playwright</span><p>Regression coverage for the workflows and failure paths that need to remain dependable.</p><button class="text-link" type="button" data-case="lyrelink">Inside the engineering <span aria-hidden="true">↗</span></button></div></div>
+  </section>
+
+  <section id="about" class="background section-shell" data-sc-act="flow"><div class="background-heading" data-sc-reveal="up" data-sc-reveal-at="0.02 0.2"><h2>Care in the details. <br>Curiosity beyond them.</h2><p>I’m a Washington-based software engineer, looking for full-stack and backend SWE roles.</p></div><div class="background-grid"><aside class="courtside" aria-labelledby="court-title"><p class="project-type">A compact side project</p><h3 id="court-title">CourtSide Analytics</h3><p>CourtSide Analytics turns SwingVision Excel and CSV exports into a Streamlit dashboard and command-line workflow. I built match and player comparisons, serve/return and rally metrics, timeline views, and CSV/Excel exports, with cached analysis for repeat uploads.</p><a class="text-link" href="https://github.com/chendry10/TennisAnalytics" target="_blank" rel="noopener">Explore the repository <span aria-hidden="true">↗</span></a></aside><div class="education-note"><h3>Whitman College</h3><p>B.A. Computer Science <br>Expected May 2027</p><dl><div><dt>Minors</dt><dd>Data Science &amp; Economics</dd></div><div><dt>GPA</dt><dd>3.94</dd></div></dl><a class="text-link" href="/shared/assets/Cameron-Hendry-Resume.pdf" target="_blank" rel="noopener">View resume <span aria-hidden="true">↗</span></a></div></div></section>
+
+  <footer id="contact" class="contact section-shell" data-sc-act="flow"><div class="contact-line"><p>Full-stack / Backend engineering</p><span>Washington, USA</span></div><h2>Let’s make <br>something useful.</h2><a class="contact-email" href="mailto:cameron.hendry@hotmail.com">cameron.hendry@hotmail.com <span aria-hidden="true">↗</span></a><div class="contact-bottom"><div><a href="https://github.com/chendry10" target="_blank" rel="noopener">GitHub ↗</a><a href="https://www.linkedin.com/in/cameron-hendry/" target="_blank" rel="noopener">LinkedIn ↗</a></div><span class="material-credit">Keyboard photo: <a href="https://unsplash.com/photos/black-and-white-computer-keyboard-dbgbyzFR8uI" target="_blank" rel="noopener">Katharina Gloth / Unsplash</a></span><a href="#top">Back to top ↑</a></div></footer>
+</main>
+<noscript><style>.gameplay-toggle,.gameplay-film{display:none!important}.scroll-cue{display:none!important}.relay-scene{display:none!important}.relay-scene{position:relative!important;display:none!important;opacity:1!important;pointer-events:auto!important;padding:55px 22px!important;height:auto!important;min-height:760px}.relay-key,.relay-circuit,.relay-phase,.relay-disclosure{display:none!important}.relay-heading{position:relative!important;inset:auto!important}.relay-product{position:relative!important;inset:auto!important;width:100%!important;margin-top:30px!important}.relay-game-reveal{clip-path:none!important}.score-routing,.classroom-section{height:auto!important;min-height:0!important}.score-routing-stage,.classroom-stage{position:relative!important;height:auto!important;min-height:0!important;padding-block:55px!important}.score-routing-field{height:auto!important;display:grid!important;gap:25px!important}.score-paper-track{position:relative!important;inset:auto!important;width:100%!important;margin:0!important;transform:none!important}.score-paper{transform:none!important}.score-director{position:relative!important;inset:auto!important;transform:none!important}.score-routing-lines{display:none!important}.loadout-rack,.loadout-module-track,.loadout-word,.loadout-shock,.loadout-key,.loadout-state{display:none!important}.loadout-theatre{height:auto!important}.loadout-game{position:relative!important;inset:auto!important;width:100%!important;clip-path:none!important;opacity:1!important;transform:none!important}.loadout-game-viewport{clip-path:none!important}.loadout-game img{height:auto!important}[data-sc-in],[data-sc-stagger]>*{opacity:1!important;transform:none!important}[data-sc-reveal]{clip-path:none!important}.concerto-opening,.education-chapter,.evidence{height:auto!important}.concerto-stage,.education-stage,.evidence-stage{position:relative!important;height:auto!important;min-height:0!important}.concerto-stage{min-height:760px!important}.education-stage{padding-block:70px}.product-view--arcade{position:relative!important;opacity:1!important;margin-top:20px}.product-frame{height:auto!important;overflow:visible!important}.product-view{position:relative!important;height:auto!important}.evidence-rail{display:grid!important;width:100%!important;transform:none!important;padding:60px 6vw!important;gap:40px!important}.evidence-rail>*{width:100%!important;max-width:none!important}.scene-plane{mask-image:none!important}.hero-music{display:none}.liquid-opening{height:auto!important}.liquid-stage{position:relative!important;height:auto!important;padding-block:55px}.liquid-crop video{display:none}.liquid-crop .sc-stage__poster{opacity:1!important}.liquid-score{opacity:1!important;transform:rotate(3deg)!important}</style></noscript>
+</body></html>

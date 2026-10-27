@@ -1,0 +1,25 @@
+{
+  "retrieved": "2026-10-26",
+  "credit": "Typing Agent",
+  "public_context": "Official public product marketing; original images, unaltered",
+  "images": [
+    {
+      "file": "typing-agent-summit-isles-world-map.jpg",
+      "width": 3392,
+      "height": 1472,
+      "source_page": "https://typingagent.com/new-feature-releases/",
+      "source_image": "https://typingagent.com/wp-content/uploads/2026/06/summit-isles-world-map.jpg",
+      "published_alt": "Summit Isles World Map",
+      "sha256": "7d465267fdfc4395441c9ec1af67e0824bdbd9c6d72e75c5e5c8afdcb28cf9db"
+    },
+    {
+      "file": "typing-agent-summit-arcade.jpg",
+      "width": 1280,
+      "height": 600,
+      "source_page": "https://typingagent.com/new-feature-releases/",
+      "source_image": "https://typingagent.com/wp-content/uploads/2026/06/summit-arcade.jpg",
+      "published_alt": "Summit Arcade",
+      "sha256": "65ce99cbd90c57e709ff45526ca4eaeaef5bc34984d69c1a073984cdaa88ad7d"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+.key-scene{isolation:isolate;pointer-events:none}
+.key-scene__canvas{position:absolute;inset:0;display:block;width:100%;height:100%;max-width:none;pointer-events:none;opacity:0;transition:opacity 240ms ease-out}
+.key-scene[data-key-scene="ready"]>.key-scene__canvas{opacity:1}
+html.motion-off .key-scene__canvas{display:none}
+@media(prefers-reduced-motion:reduce){.key-scene__canvas{display:none}}

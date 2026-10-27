@@ -1,0 +1,103 @@
+/* One native scroll owner. Large surfaces animate through composited transforms. */
+html{scroll-behavior:auto}.site-header{flex-wrap:wrap;background:linear-gradient(180deg,var(--ground) 20%,#080e21ee 70%,#080e2100)}
+html.concerto-motion .concerto-opening{height:420svh;position:relative}
+html.concerto-motion .concerto-stage{position:sticky;top:0;height:100svh;min-height:0}
+html:not(.concerto-motion) .concerto-opening{height:auto}
+.concerto-stage{position:relative;overflow:clip;min-height:760px}
+.typing-plane,.hero-software,.hero-identity,.hero-caption,.identity-scrim,.scroll-cue{will-change:auto}
+.scroll-cue{position:absolute;bottom:90px;left:max(56px,calc((100% - 1320px)/2));z-index:5;display:inline-flex;align-items:center;gap:30px;font-size:11px;text-decoration:none;color:var(--muted);min-height:44px}
+.scroll-cue span{color:var(--amber);font-size:20px}
+@media(min-width:701px){.typing-plane{width:100%;max-width:none;height:100%;aspect-ratio:auto}}
+.relay-scene{perspective:1400px;contain:layout paint;visibility:hidden}
+.relay-scene:before{background:radial-gradient(ellipse at 66% 48%,#1c3c694a,transparent 67%)}
+.relay-heading{left:max(56px,calc((100% - 1320px)/2));top:clamp(105px,15svh,150px);width:32%;z-index:5;transform-origin:0 0}
+.relay-heading .project-type{margin-bottom:24px}.relay-heading h2{font-size:clamp(48px,5.2vw,78px);line-height:1.02}
+.relay-heading>p:last-child{margin-top:24px;font-size:14px;line-height:1.65}
+.relay-key{left:27%;top:12%;width:72%;height:77%;z-index:3;transform-origin:30% 65%;pointer-events:none}
+.relay-key .switch-canvas{position:absolute;inset:0;width:100%;height:100%}
+.relay-key[data-switch-state="ready"] .key-placeholder{opacity:0}
+.relay-key .key-placeholder{inset:24% 35%}
+.relay-circuit{inset:0;width:100%;height:100%;z-index:2;opacity:0;overflow:hidden}
+.relay-current{filter:none;stroke-width:3}.relay-track{stroke-width:1.5;opacity:.55}
+.relay-contact{display:none}
+.relay-product{left:50%;right:auto;top:53%;width:min(78vw,calc(55svh * 1.6),960px);transform:translate(-50%,-50%);opacity:0;z-index:6;transform-origin:50% 50%}
+.relay-product-shell{box-shadow:0 20px 70px #02061080;border-color:#657b9f}
+.relay-product img{aspect-ratio:1440/900;object-fit:contain}
+.relay-hub{filter:none}.relay-hub-crop{clip-path:none}
+.relay-game-reveal{clip-path:none;opacity:0;will-change:auto}
+.relay-impact{display:none}
+.relay-product figcaption{margin-top:12px}.relay-product figcaption span{font-size:10px;max-width:none}
+.relay-response-heading{position:absolute;left:0;right:0;top:clamp(98px,12svh,140px);z-index:6;text-align:center;opacity:0}
+.relay-response-heading .project-type{font-size:10px;margin-bottom:12px;max-width:none}.relay-response-heading h3{font-size:clamp(30px,3.3vw,46px)}
+.relay-phase{left:max(56px,calc((100% - 1320px)/2));right:max(56px,calc((100% - 1320px)/2));bottom:65px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px}
+.relay-phase span{min-width:0;font-size:11px}.relay-disclosure{left:max(56px,calc((100% - 1320px)/2));bottom:22px;font-size:10px;max-width:100%;line-height:1.5}
+.scene-plane{mask-image:none!important;-webkit-mask-image:none!important}.scene-camera{will-change:auto}
+.lyre-optical-window{perspective:1200px}.lyre-optical-window .hero-music{z-index:3;left:auto;right:6%;width:31%;inset-block:40px;opacity:1}
+.lyre-optical-window .hero-score{transform:rotate(3deg)}.lyre-optical-window .hero-score>div{padding-top:14px}
+.lyre-optical-window .scene-plane{left:40%;width:100%;max-width:none;opacity:.85}
+.lyre-optical-window .scene-plane:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 42%,#080e2170)}
+html.concerto-motion .evidence{height:290svh;position:relative}
+html.concerto-motion .evidence-stage{position:sticky;top:0;height:100svh}
+.evidence-rail{will-change:auto}
+.evidence-image{width:min(68vw,1040px)}.evidence-image img{max-height:55svh}
+.evidence-note{width:min(42vw,660px)}
+[data-sc-in]{opacity:1;transform:none;transition:none}[data-sc-reveal]{will-change:auto;clip-path:none}
+.concerto-reveal{opacity:0;transform:translate3d(0,25px,0);transition:opacity .65s ease,transform .65s cubic-bezier(.2,.75,.2,1)}
+.concerto-reveal.is-visible{opacity:1;transform:none}
+html.concerto-motion .score-routing{height:280svh;position:relative}
+html.concerto-motion .score-routing-stage{position:sticky;top:0}
+html.concerto-still .scroll-cue{display:none}
+html.concerto-still .concerto-opening,html.concerto-still .evidence,html.concerto-still .score-routing{height:auto!important;min-height:0!important}
+html.concerto-still .concerto-stage{position:relative;min-height:760px;height:90svh}
+html.concerto-still .relay-scene{display:none}
+html.concerto-still .evidence-stage{position:relative;height:auto}
+html.concerto-still .evidence-rail{display:grid;width:100%;height:auto;transform:none!important;padding:65px max(22px,6vw);gap:48px}
+html.concerto-still .evidence-rail>*{width:100%;max-width:none}
+html.concerto-still .evidence-note{border-left:0;border-top:1px solid var(--line);padding:28px 0 0}
+html.concerto-still .evidence-image img{height:auto;max-height:750px}
+html.concerto-still .score-routing-stage{position:relative;height:auto;min-height:0}
+html.concerto-still .concerto-reveal{opacity:1;transform:none}
+@media(max-width:1050px){
+ .relay-heading{left:36px;width:36%;top:120px}.relay-heading h2{font-size:53px}
+ .relay-key{left:24%;width:76%;top:18%;height:69%}.relay-heading>p:last-child{font-size:12px}
+ .relay-phase{left:36px;right:36px;gap:18px}.relay-disclosure{left:36px;font-size:9px}
+ .scroll-cue{left:36px}.relay-product{width:min(86vw,calc(55svh * 1.6))}
+ .lyre-optical-window .hero-music{width:37%;right:4%}
+}
+@media(max-width:700px){
+ .scroll-cue{display:none}.site-header{background:var(--ground)}
+ .concerto-stage{min-height:760px}.relay-scene{display:none}
+ .lyre-optical-window .hero-music{display:none}.lyre-optical-window .scene-plane{left:48%;opacity:1}
+ .concerto-reveal{transform:translate3d(0,15px,0)}
+ .evidence-note,.evidence-image{width:100%}.evidence-image img{max-height:none}
+}
+@media(max-height:700px) and (min-width:701px){
+ .relay-heading{top:100px}.relay-heading h2{font-size:48px}.relay-heading>p:last-child{font-size:11px;margin-top:16px}
+ .relay-response-heading{top:88px}.relay-response-heading h3{font-size:30px}.relay-response-heading .project-type{margin-bottom:8px}
+ .relay-product{width:min(70vw,calc(49svh * 1.6));top:54%}.relay-product figcaption{margin-top:8px}.relay-product strong{font-size:13px}.relay-product figcaption span{font-size:8px}
+ .relay-phase{bottom:55px}.relay-disclosure{bottom:17px;font-size:8px}
+}
+@media(prefers-reduced-motion:reduce){.scroll-cue{display:none}.concerto-reveal{opacity:1;transform:none;transition:none}}
+
+/* Genuine full-HD gameplay: one lightweight, onscreen-only recording. */
+.relay-product-shell{aspect-ratio:16/9}.relay-hub-crop{display:none}
+.relay-game-reveal{inset:0}.relay-product .gameplay-poster{width:100%;height:100%;aspect-ratio:auto;object-fit:contain}
+.gameplay-film{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:contain;opacity:0}
+.gameplay-film[data-film-ready="true"]{opacity:1}
+.gameplay-film[data-film-state="poster"]{opacity:0}
+.relay-product figcaption{align-items:center;gap:8px 16px}
+.gameplay-toggle{pointer-events:auto;min-height:44px;padding:8px 12px;border:1px solid var(--line);font-size:10px;white-space:nowrap}
+.relay-product{width:min(80vw,calc(55svh * 1.77778),1040px)}
+.gameplay-evidence-frame{position:relative;aspect-ratio:16/9;overflow:clip;background:var(--ground)}
+.evidence-image .gameplay-evidence-frame>img{width:100%;height:100%;max-height:none;aspect-ratio:auto;object-fit:contain}
+.gameplay-evidence-frame .gameplay-film,.evidence-film-toggle{display:none}
+html.motion-off .gameplay-film,html.motion-off .gameplay-toggle{display:none}
+@media(max-width:1050px){.relay-product{width:min(86vw,calc(55svh * 1.77778))}}
+@media(max-height:700px) and (min-width:701px){.relay-product{width:min(76vw,calc(49svh * 1.77778))}.gameplay-toggle{font-size:9px;padding-inline:8px}}
+@media(max-width:700px){.gameplay-evidence-frame .gameplay-film{display:block}.evidence-film-toggle{display:block;justify-self:start}}
+@media(prefers-reduced-motion:reduce){.gameplay-film,.gameplay-toggle{display:none!important}}
+
+/* The receiving demo follows the folio directly, keeping the large page in view. */
+.music-chapter{padding-top:40px}.music-chapter>.demo-intro{margin-top:0}
+.music-chapter>.project-heading{margin-top:100px}
+@media(max-width:700px){.music-chapter{padding-top:40px}.music-chapter>.project-heading{margin-top:65px}}
