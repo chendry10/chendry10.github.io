@@ -1,0 +1,16 @@
+{
+  "file": "keystroke-still.jpg",
+  "sha256": "9260e2bf1e5ef936139e901e4fd233197b24c793cbee9cde728350a01760f51b",
+  "kind": "Authored procedural 3D render; not AI-generated photography",
+  "source": "switch-scene.js",
+  "sourceProgress": 0.42,
+  "capturePixels": [
+    1600,
+    1400
+  ],
+  "actualCanvasPixels": 2240000,
+  "interactivePixelBudget": 1500000,
+  "description": "Static fallback of the same key shown by the interactive WebGL scene. Rendered locally with the existing licensed Three.js runtime.",
+  "sourceSHA256": "e3de36b7c310ade426d334a4439f36472451d173f83c78de42b7f2dc02bebcfb",
+  "drawCalls": 27
+}

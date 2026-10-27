@@ -1,13 +1,14 @@
 /**
  * Authored cutaway of a keystroke. The page owns time, scroll and scheduling.
- * Local Three.js MIT bundle; no shadow maps, transmission pass or frame loop.
+ * Local Three.js MIT bundle; material microfinish and two cheap contact decals.
+ * No shadow maps, transmission pass, external textures or independent frame loop.
  * Progress is reversible and deterministic: explode → seat → close → signal.
  */
 const scenes = new WeakMap();
 const clamp = value => Math.min(1, Math.max(0, Number.isFinite(value) ? value : 0));
 const smooth = (a, b, value) => { const t = clamp((value - a) / (b - a)); return t * t * (3 - 2 * t); };
 
-export async function createSwitchScene(host, {signal} = {}) {
+export async function createSwitchScene(host, {signal, poster=false} = {}) {
   if (!(host instanceof Element)) throw new TypeError('A sized switch host is required.');
   scenes.get(host)?.dispose();
   let dead = false, ready = false, visible = !document.hidden, contextLost = false;
@@ -71,7 +72,9 @@ export async function createSwitchScene(host, {signal} = {}) {
     if (dead || !ready || !visible || quiet() || width < 2 || height < 2) return;
     if (sizeDirty) {
       const ratio = Math.min(devicePixelRatio || 1, 1.5);
-      const limit = Math.min(1, Math.sqrt(1_500_000 / (width * height * ratio * ratio)));
+      // Offline still capture can supersample; interactive scroll keeps its original budget.
+      const pixelBudget=poster?8_300_000:1_500_000;
+      const limit = Math.min(1, Math.sqrt(pixelBudget / (width * height * ratio * ratio)));
       const w = Math.max(1, Math.round(width * ratio * limit)), h = Math.max(1, Math.round(height * ratio * limit));
       if (w !== drawWidth || h !== drawHeight) { renderer.setSize(w, h, false); drawWidth = w; drawHeight = h; }
       const aspect = width / height, vertical = Math.max(6.25, 5.9 / aspect);
@@ -92,7 +95,7 @@ export async function createSwitchScene(host, {signal} = {}) {
 
   try {
     if (signal?.aborted || quiet()) { api.dispose(); if (!scenes.has(host)) host.dataset.switchState = 'fallback'; return api; }
-    const T = await import('../../shared/vendor/three-key-runtime.js');
+    const T = await import('./shared/vendor/three-key-runtime.js');
     if (dead || signal?.aborted || quiet()) { api.dispose(); return api; }
     const context = canvas.getContext('webgl2', {alpha:true, antialias:true, powerPreference:'high-performance', premultipliedAlpha:true});
     if (!context) throw new Error('WebGL2 unavailable');
@@ -100,32 +103,74 @@ export async function createSwitchScene(host, {signal} = {}) {
     renderer.setClearColor(0x000000, 0);
     renderer.outputColorSpace = T.SRGBColorSpace;
     renderer.toneMapping = T.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = .88;
+    renderer.toneMappingExposure = .82;
     renderer.shadowMap.enabled = false;
     scene = new T.Scene();
     camera = new T.OrthographicCamera(-3, 3, 3, -3, .1, 50);
     const pmrem = new T.PMREMGenerator(renderer), room = new T.RoomEnvironment();
     try { environment = pmrem.fromScene(room, .035); scene.environment = environment.texture; }
     finally { room.dispose(); pmrem.dispose(); }
-    scene.environmentIntensity = 1.15;
-    scene.add(new T.HemisphereLight(0xa9c8ff, 0x0c1525, 1.15));
-    const keyLight = new T.DirectionalLight(0xffe5bf, 3.0); keyLight.position.set(-4, 8, 6); scene.add(keyLight);
-    const coolLight = new T.DirectionalLight(0x779fff, 2.4); coolLight.position.set(5, 3, -4); scene.add(coolLight);
+    // A broad warm key and two restrained edge lights retain shape in dark
+    // materials. Low ambient fill prevents the moulded surfaces washing flat.
+    scene.environmentIntensity = .64;
+    scene.add(new T.HemisphereLight(0xc0d3e4, 0x060b13, .32));
+    const keyLight = new T.DirectionalLight(0xffe6cf, 3.5); keyLight.position.set(-4, 8, 6); scene.add(keyLight);
+    const coolLight = new T.DirectionalLight(0x9fc4ef, 1.15); coolLight.position.set(5, 3, -4); scene.add(coolLight);
+    const rimLight = new T.DirectionalLight(0xd6e5f2, 1.55); rimLight.position.set(-5, 2, -7); scene.add(rimLight);
 
     const geometry = item => (geometries.add(item), item);
     const material = item => (materials.add(item), item);
-    const ceramic = material(new T.MeshPhysicalMaterial({color:0xbac6d1, metalness:.04, roughness:.24, clearcoat:.65, clearcoatRoughness:.22}));
-    const graphite = material(new T.MeshStandardMaterial({color:0x101d2d, metalness:.64, roughness:.28}));
-    const black = material(new T.MeshStandardMaterial({color:0x09101c, metalness:.25, roughness:.32}));
-    const copper = material(new T.MeshStandardMaterial({color:0xc57947, metalness:1, roughness:.20}));
-    const gold = material(new T.MeshStandardMaterial({color:0xe3b168, metalness:1, roughness:.19}));
-    const steel = material(new T.MeshStandardMaterial({color:0x8fa8b9, metalness:.95, roughness:.19}));
-    const glass = material(new T.MeshStandardMaterial({color:0x91c6ed, metalness:.15, roughness:.15, transparent:true, opacity:.10, depthWrite:false}));
+    const ceramic = material(new T.MeshPhysicalMaterial({color:0xb9c1c6, metalness:.025, roughness:.36, clearcoat:.24, clearcoatRoughness:.32}));
+    const graphite = material(new T.MeshStandardMaterial({color:0x0b111b, metalness:.66, roughness:.32}));
+    const black = material(new T.MeshStandardMaterial({color:0x05090f, metalness:.18, roughness:.40}));
+    const copper = material(new T.MeshStandardMaterial({color:0xad633f, metalness:1, roughness:.22, envMapIntensity:1.1}));
+    const gold = material(new T.MeshStandardMaterial({color:0xc99e5c, metalness:1, roughness:.25}));
+    const steel = material(new T.MeshStandardMaterial({color:0x7d909f, metalness:1, roughness:.23, envMapIntensity:1.1}));
+    const glass = material(new T.MeshStandardMaterial({color:0x7fa8c4, metalness:.15, roughness:.16, transparent:true, opacity:.08, depthWrite:false}));
     const amber = material(new T.MeshBasicMaterial({color:0xffc779, transparent:true, opacity:1}));
     const halo = material(new T.MeshBasicMaterial({color:0xffc779, transparent:true, opacity:.11, depthWrite:false, blending:T.AdditiveBlending}));
     const activeGold = material(new T.MeshStandardMaterial({color:0xffce82, metalness:.85, roughness:.18, emissive:0xff9d38, emissiveIntensity:0}));
     const model = new T.Group(); scene.add(model);
     function mesh(g, mat, parent=model) { const object = new T.Mesh(geometry(g), mat); parent.add(object); return object; }
+    function textureFromPixels(paint) {
+      const surface=document.createElement('canvas');surface.width=surface.height=128;
+      const context=surface.getContext('2d');if(!context)return null;
+      const pixels=context.createImageData(128,128);paint(pixels.data);context.putImageData(pixels,0,0);
+      const texture=new T.CanvasTexture(surface);textures.add(texture);
+      texture.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
+      return texture;
+    }
+    // Deterministic microfinish: a shallow normal/roughness variation in the
+    // moulded keycap, not a colour overlay or an image fetched at runtime.
+    const microfinish=textureFromPixels(pixels=>{
+      let seed=0x4a3b2c1d;
+      for(let i=0;i<pixels.length;i+=4){
+        seed^=seed<<13;seed^=seed>>>17;seed^=seed<<5;
+        const value=218+Math.round((seed>>>0)/4294967295*28);
+        pixels[i]=pixels[i+1]=pixels[i+2]=value;pixels[i+3]=255;
+      }
+    });
+    const capFinish=material(new T.MeshPhysicalMaterial({color:0xc0c7cb,metalness:.025,roughness:.43,clearcoat:.25,clearcoatRoughness:.33,...(microfinish?{roughnessMap:microfinish,bumpMap:microfinish,bumpScale:.004}: {})}));
+    // Two static occlusion decals supply contact around the carrier and the
+    // housing foot. They cost two transparent draws, not a shadow-map pass.
+    const occlusion=textureFromPixels(pixels=>{
+      for(let y=0;y<128;y++)for(let x=0;x<128;x++){
+        const u=(x+.5)/64-1,v=(y+.5)/64-1;
+        const coverage=Math.pow(Math.max(0,1-Math.abs(u)**3-Math.abs(v)**3),.75);
+        const i=(y*128+x)*4;pixels[i]=pixels[i+1]=pixels[i+2]=0;pixels[i+3]=Math.round(coverage*150);
+      }
+    });
+    if(occlusion){
+      const contactShade=material(new T.MeshBasicMaterial({map:occlusion,color:0x000000,transparent:true,depthWrite:false,toneMapped:false}));
+      const shade=(w,d,y)=>{
+        const g=new T.BufferGeometry();
+        g.setAttribute('position',new T.Float32BufferAttribute([-w/2,y,-d/2,-w/2,y,d/2,w/2,y,d/2,w/2,y,-d/2],3));
+        g.setAttribute('uv',new T.Float32BufferAttribute([0,0,0,1,1,1,1,0],2));g.setIndex([0,1,2,0,2,3]);
+        return mesh(g,contactShade);
+      };
+      shade(5.15,3.64,-.285);
+      shade(2.42,2.26,.008);
+    }
     function rounded(w, d, r) {
       const s = new T.Shape(), x = -w/2, z = -d/2;
       s.moveTo(x+r,z); s.lineTo(x+w-r,z); s.quadraticCurveTo(x+w,z,x+w,z+r);
@@ -200,7 +245,8 @@ export async function createSwitchScene(host, {signal} = {}) {
     for(let l=0;l<levels.length-1;l++)for(let i=0;i<ringCount;i++){const j=(i+1)%ringCount,a=l*ringCount+i,b=(l+1)*ringCount+i,c=l*ringCount+j,d=(l+1)*ringCount+j;indices.push(a,b,c,c,b,d);}
     const top=vertices.length/3;vertices.push(0,.245,0);const bottom=vertices.length/3;vertices.push(0,-.31,0);
     for(let i=0;i<ringCount;i++){const j=(i+1)%ringCount;indices.push(top,(levels.length-1)*ringCount+j,(levels.length-1)*ringCount+i,bottom,i,j);}
-    const capGeo=new T.BufferGeometry();capGeo.setAttribute('position',new T.Float32BufferAttribute(vertices,3));capGeo.setIndex(indices);capGeo.computeVertexNormals();mesh(capGeo,ceramic,cap);
+    const capUV=[];for(let i=0;i<vertices.length;i+=3)capUV.push((vertices[i]+1.28)/2.56,(vertices[i+2]+1.16)/2.32);
+    const capGeo=new T.BufferGeometry();capGeo.setAttribute('position',new T.Float32BufferAttribute(vertices,3));capGeo.setAttribute('uv',new T.Float32BufferAttribute(capUV,2));capGeo.setIndex(indices);capGeo.computeVertexNormals();mesh(capGeo,capFinish,cap);
     pipe([[.35,.278,-.29],[.35,.274,.08],[.21,.263,.23],[-.35,.253,.23]],.018,graphite,cap,32);
     for(const z of[-1,1]){const arrow=mesh(new T.BoxGeometry(.27,.013,.035),graphite,cap);arrow.position.set(-.25,.257,.23+z*.082);arrow.rotation.y=z*-.65;}
     batch(cap);
