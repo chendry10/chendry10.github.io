@@ -1,0 +1,26 @@
+/* Three real score pages move as a physical folio, then seat in quiet wells. */
+.folio-enhanced .score-routing-field{perspective:1500px;isolation:isolate}
+.folio-enhanced .score-paper-track{left:0;top:0;margin:0;width:var(--folio-paper-width,280px);transform-style:preserve-3d;will-change:transform}
+.folio-enhanced .score-paper{transform-origin:50% 68%;backface-visibility:hidden;will-change:transform}
+.folio-enhanced .score-paper img{box-shadow:0 10px 23px #02061050;border-width:5px}
+.folio-enhanced .score-paper figcaption{padding-top:10px;min-height:32px;gap:8px}
+.folio-enhanced .score-paper figcaption span{font-size:12px;white-space:nowrap}
+.folio-enhanced .score-paper small{font-size:9px;white-space:nowrap}
+.folio-enhanced .score-routing-lines{z-index:0;opacity:.14}
+.folio-enhanced .score-route-active{filter:none;stroke-width:2}
+.folio-enhanced .score-route-base{stroke-width:1;opacity:.65}
+.folio-enhanced .score-director{z-index:14;background:var(--ground);padding:12px 24px 8px}
+.folio-device-well{position:absolute;z-index:1;pointer-events:none;opacity:0;border-radius:15px;border:1px solid var(--line);background:linear-gradient(145deg,#23354b66,#0b1526b8 42%,#050b1855);box-shadow:inset 0 1px 0 #b9d9ff22,inset 0 -1px 0 #0007;will-change:transform,opacity}
+.folio-device-well:before{content:"";position:absolute;inset:6px;border:1px solid #9cc5ff15;border-radius:10px}
+.folio-device-well:after{content:"";position:absolute;left:calc(50% - 20px);bottom:5px;width:40px;height:2px;background:var(--line);border-radius:2px}
+.folio-device-status{position:absolute;right:8px;top:8px;width:4px;height:4px;border-radius:50%;background:var(--sc-accent);opacity:0}
+.folio-broadcast-pulse{position:absolute;pointer-events:none;z-index:0;left:50%;bottom:30px;width:64px;height:64px;border:1px solid var(--sc-accent);border-radius:50%;opacity:0;transform-origin:50% 50%;will-change:transform,opacity}
+.folio-enhanced.folio-still .score-routing-field{perspective:none}
+.folio-enhanced.folio-still .score-paper-track{position:relative;inset:auto;width:100%;margin:0;transform:none!important;will-change:auto}
+.folio-enhanced.folio-still .score-paper{transform:none!important;will-change:auto}
+.folio-enhanced.folio-still .score-paper figcaption{opacity:1!important}
+.folio-enhanced.folio-still .folio-device-well,.folio-enhanced.folio-still .folio-broadcast-pulse{display:none}
+html.motion-off .folio-enhanced .score-paper-track,html.motion-off .folio-enhanced .score-paper{will-change:auto}
+@media(min-width:701px) and (max-width:900px){.folio-enhanced .score-paper figcaption{display:block;min-height:40px}.folio-enhanced .score-paper small{display:block;margin-top:2px}}
+@media(max-width:700px){.folio-enhanced .score-routing-field{perspective:none}.folio-enhanced .score-paper-track{position:relative;inset:auto;width:100%;margin:0;transform:none!important;will-change:auto}.folio-enhanced .score-paper{transform:none!important;will-change:auto}.folio-enhanced .score-paper figcaption{opacity:1!important;display:flex;min-height:0;padding-top:13px}.folio-enhanced .score-paper figcaption span{font-size:14px}.folio-enhanced .score-paper small{font-size:11px}.folio-device-well,.folio-broadcast-pulse{display:none}}
+@media(prefers-reduced-motion:reduce){.folio-enhanced .score-routing-field{perspective:none}.folio-enhanced .score-paper-track{position:relative;inset:auto;width:100%;margin:0;transform:none!important;will-change:auto}.folio-enhanced .score-paper{transform:none!important;will-change:auto}.folio-enhanced .score-paper figcaption{opacity:1!important}.folio-device-well,.folio-broadcast-pulse{display:none}}

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024"><style>text{font-family:Arial,Helvetica,sans-serif}</style><rect width="1024" height="1024" rx="224" fill="#101733"/><g transform="scale(2)">  <!-- Lyre-inspired mark (simple + bold for small sizes) -->
+  <g fill="none" stroke="#D9B24C" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Outer frame -->
+    <path d="M178 148c-34 28-54 78-54 132 0 83 47 150 132 150s132-67 132-150c0-54-20-104-54-132" />
+    <!-- Arms -->
+    <path d="M178 148c20 6 42 10 78 10s58-4 78-10" />
+    <!-- Base -->
+    <path d="M196 402c18 8 38 12 60 12s42-4 60-12" />
+    <!-- Strings -->
+    <path d="M222 168v224" />
+    <path d="M256 166v232" />
+    <path d="M290 168v224" />
+  </g>
+
+  <!-- Subtle link/connection dot to hint "Link" -->
+  <circle cx="356" cy="212" r="10" fill="#D9B24C" opacity="0.9" />
+</g></svg>

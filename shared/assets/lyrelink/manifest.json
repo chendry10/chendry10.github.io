@@ -1,0 +1,65 @@
+[
+  {
+    "file": "victors-cornet.webp",
+    "source": "The.Victors.March.-.Michigan.pdf",
+    "page": 11,
+    "width": 1600,
+    "height": 1200
+  },
+  {
+    "file": "victors-clarinet.webp",
+    "source": "The.Victors.March.-.Michigan.pdf",
+    "page": 6,
+    "width": 1600,
+    "height": 1200
+  },
+  {
+    "file": "victors-trombone.webp",
+    "source": "The.Victors.March.-.Michigan.pdf",
+    "page": 15,
+    "width": 1600,
+    "height": 1200
+  },
+  {
+    "file": "victory-cornet.webp",
+    "source": "Victory.March.-.Notre.Dame.pdf",
+    "page": 14,
+    "width": 2200,
+    "height": 1700
+  },
+  {
+    "file": "victory-clarinet.webp",
+    "source": "Victory.March.-.Notre.Dame.pdf",
+    "page": 7,
+    "width": 2200,
+    "height": 1700
+  },
+  {
+    "file": "victory-trombone.webp",
+    "source": "Victory.March.-.Notre.Dame.pdf",
+    "page": 18,
+    "width": 2200,
+    "height": 1700
+  },
+  {
+    "file": "wisconsin-cornet.webp",
+    "source": "On.Wisconsin.-.Wisconsin.pdf",
+    "page": 16,
+    "width": 2200,
+    "height": 1700
+  },
+  {
+    "file": "wisconsin-clarinet.webp",
+    "source": "On.Wisconsin.-.Wisconsin.pdf",
+    "page": 8,
+    "width": 2200,
+    "height": 1700
+  },
+  {
+    "file": "wisconsin-trombone.webp",
+    "source": "On.Wisconsin.-.Wisconsin.pdf",
+    "page": 20,
+    "width": 2200,
+    "height": 1700
+  }
+]

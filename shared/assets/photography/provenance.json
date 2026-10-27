@@ -1,0 +1,41 @@
+{
+  "photographer": "Katharina Gloth",
+  "sourcePage": "https://unsplash.com/photos/black-and-white-computer-keyboard-dbgbyzFR8uI",
+  "sourceImage": "https://images.unsplash.com/photo-1612198188060-c7c2a3b66eae",
+  "license": "Unsplash License",
+  "licenseUrl": "https://unsplash.com/license",
+  "sourcePublished": "2021-02-01",
+  "sourceCamera": "Canon EOS 600D (as listed by Unsplash)",
+  "sourceDimensions": [
+    5184,
+    3456
+  ],
+  "sourceSha256": "14ec4b642c45ef1fdb74c37a0092bdf955da23ef1c1bee50b9448adbfd5a3261",
+  "accessed": "2026-10-26",
+  "assets": [
+    {
+      "file": "keyboard-blue-1920.webp",
+      "width": 1920,
+      "height": 1280,
+      "bytes": 247664,
+      "sha256": "1d773a766b42701a7b3c0588f9a41e6a3cbee7d59a5ac1ddb88f313eedbe9763",
+      "processing": "proportional downsize and WebP encoding only; no generative editing, color retouching or upscaling"
+    },
+    {
+      "file": "keyboard-blue-3840.webp",
+      "width": 3840,
+      "height": 2560,
+      "bytes": 821270,
+      "sha256": "9b4b3fb334c7be5eac1bd599429d9cb2645730b31e84a0fa14c139e6b46f0dbe",
+      "processing": "proportional downsize and WebP encoding only; no generative editing, color retouching or upscaling"
+    },
+    {
+      "file": "keyboard-blue-1440.webp",
+      "width": 1440,
+      "height": 960,
+      "bytes": 154270,
+      "sha256": "9a2659023f20e1265544b8efd1ecde9cdc037ec2352ebe626464eeb097394510",
+      "processing": "proportional downsize and WebP encoding only; no generative editing, color retouching or upscaling"
+    }
+  ]
+}
