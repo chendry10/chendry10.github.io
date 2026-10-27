@@ -19,6 +19,8 @@ GitHub Pages publishes the root of `main`; `.nojekyll` preserves the buildless s
 
 The previous portfolio remains in Git history. Its original resume download path, `/Cameron_Hendry_Resume.pdf`, continues to serve the current PDF. The current site's resume link lives under `/shared/assets/`.
 
+The animation entry and deferred key renderer use content-versioned URLs so returning visitors receive matching code after a Pages update. When either module changes, refresh its 12-character SHA-256 query in its importer (normalize CRLF to LF before hashing); the validation command checks both versions.
+
 ## Sources and boundaries
 
 - `motion.js`, `switch-scene.js`, `product-bridge.js`, `score-folio.js` and `score-journey.js` contain the visual choreography. One demand-driven scheduler follows native scrolling; the game and score each retain their identity through their handoffs. Reduced motion and tablet/phone layouts use native reading positions.

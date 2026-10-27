@@ -29,6 +29,9 @@ check(html.indexOf('class="live-demo"')<html.indexOf('class="music-engineering"'
 check(html.includes('SwingVision')&&html.includes('command-line'),'Accurate compact Tennis');
 check(html.includes('<noscript>'),'Native no-JS fallback');
 check((html.match(/<video\b/g)||[]).length===1&&html.includes('data-product-bay'),'One genuine game instance with a reading destination');
+const moduleVersion=file=>hash(fs.readFileSync(path.join(root,file),'utf8').replaceAll('\r\n','\n')).slice(0,12);
+check(html.includes(`src="./motion.js?v=${moduleVersion('motion.js')}"`),'Animation entry URL matches its content for returning visitors');
+check(fs.readFileSync(path.join(root,'motion.js'),'utf8').includes(`import('./switch-scene.js?v=${moduleVersion('switch-scene.js')}')`),'Deferred key renderer URL matches its content');
 for(const m of html.matchAll(/\b(?:href|src|poster|data-source|data-source-small)="([^"]+)"/g))reference(m[1],path.join(root,'index.html'));
 for(const m of html.matchAll(/\bsrcset="([^"]+)"/g))for(const item of m[1].split(','))reference(item.trim().split(/\s+/)[0],path.join(root,'index.html'));
 for(const file of files){
