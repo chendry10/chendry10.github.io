@@ -28,12 +28,17 @@ check(html.includes('data-initial-song="victory"')&&html.includes('data-lyre-dem
 check(html.indexOf('class="live-demo"')<html.indexOf('class="music-engineering"'),'Demo directly follows the score journey');
 check(html.includes('SwingVision')&&html.includes('command-line'),'Accurate compact Tennis');
 check(html.includes('<noscript>'),'Native no-JS fallback');
+check((html.match(/<video\b/g)||[]).length===1&&html.includes('data-product-bay'),'One genuine game instance with a reading destination');
 for(const m of html.matchAll(/\b(?:href|src|poster|data-source|data-source-small)="([^"]+)"/g))reference(m[1],path.join(root,'index.html'));
 for(const m of html.matchAll(/\bsrcset="([^"]+)"/g))for(const item of m[1].split(','))reference(item.trim().split(/\s+/)[0],path.join(root,'index.html'));
 for(const file of files){
   const relative=path.relative(root,file).replaceAll(path.sep,'/');
   check(!fs.lstatSync(file).isSymbolicLink(),`No symlink: ${relative}`);
   check(!/(^|\/)(qa|capture-frames|capture-direct|node_modules|\.git)(\/|$)|\.(?:csv|xlsx|sqlite|key|pem)$|(^|\/)\.env/i.test(relative),`Public artifact only: ${relative}`);
+  if(/\.(?:html|css|js|json|xml|md|txt)$/.test(file)){
+    try{new TextDecoder('utf-8',{fatal:true}).decode(fs.readFileSync(file));check(true,`UTF-8 ${relative}`);}
+    catch{check(false,`Invalid UTF-8 ${relative}`);}
+  }
   if(!/\.(js|css)$/.test(file))continue;
   const source=fs.readFileSync(file,'utf8');
   if(file.endsWith('.js')){
@@ -49,6 +54,9 @@ for(const asset of photos.assets)check(hash(fs.readFileSync(path.join(root,'shar
 const scores=JSON.parse(fs.readFileSync(path.join(root,'shared/assets/lyrelink/manifest.json')));
 check(scores.length===9&&scores.every(s=>fs.existsSync(path.join(root,'shared/assets/lyrelink',s.file))),'All nine complete public parts');
 const pdf=fs.readFileSync(path.join(root,'shared/assets/Cameron-Hendry-Resume.pdf'));
+const keyStill=JSON.parse(fs.readFileSync(path.join(root,'shared/assets/product/keystroke-still-provenance.json')));
+check(hash(fs.readFileSync(path.join(root,'shared/assets/product',keyStill.file)))===keyStill.sha256,'Authored key fallback matches its provenance');
+check(keyStill.file.endsWith('.jpg')&&fs.readFileSync(path.join(root,'shared/assets/product',keyStill.file)).subarray(0,3).equals(Buffer.from([255,216,255])),'Hero still format agrees with its JPEG content type');
 check(hash(pdf)==='1e9c5a727407089a81f3761cc1530ab8eddbfad3993c7ba137d8e52020909f9d','Approved one-page PDF with verified portfolio link');
 check(fs.existsSync('.nojekyll'),'Buildless GitHub Pages deployment');
 check(!fs.existsSync('.openai'),'No former hosting configuration');

@@ -1,6 +1,6 @@
 # Cameron Hendry's portfolio
 
-Live at **https://chendry10.github.io/**. This is the selected Cobalt Concerto design: real keyboard photography, an authored 3D switch study, actual Typing Agent gameplay, and a continuous score-page journey that lands in a working LyreLink demonstration.
+Live at **https://chendry10.github.io/**. The connected Cobalt Concerto story begins with an authored 3D key. Its signal becomes actual Typing Agent gameplay, and that same game window settles into the engineering case. A later score-page journey lands in a working LyreLink demonstration.
 
 ## Local preview and validation
 
@@ -21,9 +21,9 @@ The previous portfolio remains in Git history. Its original resume download path
 
 ## Sources and boundaries
 
-- `motion.js`, `switch-scene.js`, `score-folio.js` and `score-journey.js` contain the visual choreography. Native scrolling, reduced motion and mobile fallbacks remain available.
+- `motion.js`, `switch-scene.js`, `product-bridge.js`, `score-folio.js` and `score-journey.js` contain the visual choreography. One demand-driven scheduler follows native scrolling; the game and score each retain their identity through their handoffs. Reduced motion and tablet/phone layouts use native reading positions.
 - `shared/lyre-demo.js` implements the browser-local director/member demonstration; it does not connect to a live band or private music library.
-- Media source notices and licenses are beside the files under `shared/assets/` and `shared/vendor/`. Illustrative music artwork is distinguished from actual product captures. The keyboard hero is licensed photography.
+- Media source notices and licenses are beside the files under `shared/assets/` and `shared/vendor/`. The key still is rendered from this site's procedural geometry; it matches the interactive object. Illustrative music artwork is distinguished from actual product captures. Previously used keyboard photographs remain archived in the assets but are not loaded by the page.
 - No student records, private application source, analytics trackers, credentials or backend API are included. Local QA evidence stays outside the publication.
 
 This repository is the canonical hosting source for the portfolio.
