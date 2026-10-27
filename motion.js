@@ -58,7 +58,7 @@ function releaseKey(){
 function warmKey(){
   if(still||hidden||key||keyLoading)return;
   keyLoading=true;const ticket=++keyTicket;keyAbort=new AbortController();const signal=keyAbort.signal;
-  import('./switch-scene.js').then(({createSwitchScene})=>createSwitchScene(keyHost,{signal})).then(controller=>{
+  import('./switch-scene.js?v=c69d4640b2fd').then(({createSwitchScene})=>createSwitchScene(keyHost,{signal})).then(controller=>{
     if(signal.aborted||ticket!==keyTicket||quiet()){controller.dispose();return;}
     key=controller;keyLoading=false;controller.setProgress(keyLatest);schedule();
   }).catch(()=>{if(ticket===keyTicket){keyLoading=false;data(keyHost,'switchState','fallback');}});
