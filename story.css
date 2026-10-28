@@ -1,7 +1,8 @@
 /* One material world, two meaningful handoffs, and room to read between them. */
 .site-header{background:linear-gradient(180deg,var(--ground) 15%,transparent);padding-inline:max(32px,calc((100vw - 1510px)/2))}
 .site-header nav{gap:8px 24px;font-size:13px}
-html.concerto-motion .concerto-opening{height:320svh}
+/* 5.5 viewport heights of scroll travel: give the mechanism time to unfold. */
+html.concerto-motion .concerto-opening{height:650svh}
 .concerto-stage{background:var(--ground)}
 .concerto-opening .hero-identity{max-width:49%;top:48%;left:max(56px,calc((100vw - 1320px)/2))}
 .hero-identity h1{font-size:clamp(84px,8.1vw,124px);line-height:.96}
