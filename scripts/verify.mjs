@@ -99,6 +99,18 @@ for(const [index,frame]of sequence.frames.entries()){
   check(size?.[0]===sequence.width&&size?.[1]===sequence.height&&frame.width===sequence.width&&frame.height===sequence.height,`Native key frame dimensions ${index}`);
 }
 check(sequenceBytes<=20*1024*1024,'Compressed key sequence stays within its delivery budget');
+if(sequence.compact){
+  check(sequence.compact.width===960&&sequence.compact.height===840&&sequence.compact.frames.length===sequence.frameCount,'Complete pre-sized medium sequence');
+  for(const [index,frame]of sequence.compact.frames.entries()){
+    const safe=frame.file===`key-${String(index).padStart(3,'0')}-960.webp`;check(safe,`Safe compact key frame ${index}`);if(!safe)continue;
+    const bytes=fs.readFileSync(path.join(sequenceRoot,frame.file)),size=webpSize(bytes);
+    check(frame.index===index&&frame.progress===sequence.frames[index].progress,`Compact pose matches original ${index}`);
+    check(hash(bytes)===frame.sha256&&bytes.length===frame.bytes,`Compact key integrity ${index}`);
+    check(size?.[0]===960&&size?.[1]===840&&frame.width===960&&frame.height===840,`Compact key dimensions ${index}`);
+  }
+  const unique=new Map([...sequence.frames,...sequence.compact.frames].map(f=>[f.sha256,f.bytes]));
+  check([...unique.values()].reduce((sum,n)=>sum+n,0)<=20*1024*1024,'Both sequence tiers fit bounded compressed cache');
+}
 check(hash(pdf)==='1e9c5a727407089a81f3761cc1530ab8eddbfad3993c7ba137d8e52020909f9d','Approved one-page PDF with verified portfolio link');
 check(fs.existsSync('.nojekyll'),'Buildless GitHub Pages deployment');
 check(!fs.existsSync('.openai'),'No former hosting configuration');

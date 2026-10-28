@@ -3,5 +3,5 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "scripts": {"start": "node scripts/serve.mjs", "test": "node scripts/verify.mjs"}
+  "scripts": {"start": "node scripts/serve.mjs", "test": "node scripts/verify.mjs && node --experimental-vm-modules scripts/key-sequence.test.mjs"}
 }
