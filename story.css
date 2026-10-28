@@ -13,7 +13,7 @@ html.concerto-motion .concerto-opening{height:760svh}
 .scroll-cue{bottom:88px;font-size:12px}
 .relay-scene{inset:0;position:absolute;visibility:visible;opacity:1;background:transparent;pointer-events:none;contain:none}
 .relay-scene:before{display:none}
-.relay-key{left:calc(67.5% - min(32.5vw,45.714svh));top:calc(47% - min(28.4375vw,40svh));width:min(65vw,91.428svh);height:min(56.875vw,80svh);transform-origin:50% 50%;mask-image:linear-gradient(90deg,transparent,#000 17%,#000 92%,transparent),linear-gradient(180deg,transparent,#000 8%,#000 90%,transparent);mask-composite:intersect}
+.relay-key{left:calc(70% - min(32.5vw,43.428svh));top:calc(55% - min(28.4375vw,38svh));width:min(65vw,86.856svh);height:min(56.875vw,76svh);transform-origin:50% 50%;mask-image:linear-gradient(90deg,transparent,#000 17%,#000 92%,transparent),linear-gradient(180deg,transparent,#000 4%,#000 84%,transparent);mask-composite:intersect}
 .relay-heading{top:19%;left:max(56px,calc((100vw - 1320px)/2));width:35%;opacity:0}
 .relay-heading h2{font-size:clamp(58px,5.6vw,82px);line-height:1.02}
 .relay-heading .project-type{font-size:13px;margin-bottom:24px}
@@ -67,7 +67,7 @@ html.concerto-still .score-director{position:relative;inset:auto;transform:none;
  .hero-identity h1{font-size:clamp(76px,9.1vw,98px)}
  .concerto-opening .hero-lead{font-size:15px;max-width:320px}
  .concerto-opening .role-line{font-size:12px}
- .relay-key{left:calc(67.5% - min(32.5vw,43.428svh));top:calc(48% - min(28.4375vw,38svh));width:min(65vw,86.856svh);height:min(56.875vw,76svh)}
+ .relay-key{left:calc(70% - min(32.5vw,43.428svh));top:calc(55% - min(28.4375vw,38svh));width:min(65vw,86.856svh);height:min(56.875vw,76svh)}
  .relay-heading{left:36px;width:37%}.relay-heading h2{font-size:59px}.relay-heading>p:last-child{font-size:14px}
  .hero-caption{font-size:10px}.relay-phase span{font-size:10px}.relay-disclosure{font-size:10px}
  .relay-product>figcaption>span{font-size:11px}

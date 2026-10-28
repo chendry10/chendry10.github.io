@@ -1,0 +1,44 @@
+{
+  "concept": "silicon",
+  "geometry": "Original authored procedural Blender geometry",
+  "renderer": "Blender Cycles / OptiX",
+  "samples": 384,
+  "dimensions": [
+    2560,
+    2240
+  ],
+  "HDRI": {
+    "name": "Studio Small 09",
+    "author": "Sergej Majboroda",
+    "url": "https://polyhaven.com/a/studio_small_09",
+    "license": "CC0"
+  },
+  "note": "Illustrative hardware, not a capture of actual software or a manufactured device",
+  "sequence": {
+    "frames": 121,
+    "width": 1280,
+    "height": 1120,
+    "samples": 160
+  },
+  "sourceSHA256": "df35467836277505d07c8ae0c73bc482105d8bed7b9f1a5026399253fbd411c0",
+  "heroSHA256": "f30753336deb7e51c86ba0a20d4305f113835cadfd472a25b28f379857b55c9c",
+  "originalStudySourceSHA256": "165f9e18cefa4a4cb61945a560262dfd8caed0503027f47278adf09f0e175de4",
+  "source": "scripts/render-hero-studies.py",
+  "reproduction": "Same geometry, materials and animation as the chosen Silicon Stack; only HDRI/font locations are parameterized in the published source.",
+  "variants": [
+    {
+      "file": "hero-960.webp",
+      "width": 960,
+      "height": 840,
+      "bytes": 67820,
+      "sha256": "ac04163158d3b9bc2def4ad46ec64463eee4e6baf68968636ad2e2194c827b67"
+    },
+    {
+      "file": "hero-1280.webp",
+      "width": 1280,
+      "height": 1120,
+      "bytes": 98636,
+      "sha256": "e957bbabc9d0f11a7ca2a4c4a359ce9d4ec111953d611c2036d565f14c595da9"
+    }
+  ]
+}
