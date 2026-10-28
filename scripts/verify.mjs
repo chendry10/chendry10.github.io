@@ -111,6 +111,31 @@ if(sequence.compact){
   const unique=new Map([...sequence.frames,...sequence.compact.frames].map(f=>[f.sha256,f.bytes]));
   check([...unique.values()].reduce((sum,n)=>sum+n,0)<=32*1024*1024,'Both sequence tiers fit bounded compressed cache');
 }
+const processorRoot=path.join(root,'shared/assets/product/processor-sequence');
+const processor=JSON.parse(fs.readFileSync(path.join(processorRoot,'manifest.json')));
+const processorNotice=JSON.parse(fs.readFileSync(path.join(processorRoot,'source-notice.json')));
+check(processor.frameCount===121&&processor.width===1280&&processor.height===1120&&processor.initialIndex===0,'Selected CPU dimensions and opening pose');
+check(processor.frames[0].progress===0&&processor.frames.at(-1).progress===1,'CPU covers complete opening');
+for(const [tier,width,height,suffix] of [[processor,1280,1120,''],[processor.compact,960,840,'-960']]){
+  check(tier.frames.length===121,'Complete CPU tier');
+  for(const [index,frame] of tier.frames.entries()){
+    const safe=frame.file===`key-${String(index).padStart(3,'0')}${suffix}.webp`;
+    check(safe,`Safe CPU frame ${suffix}/${index}`);if(!safe)continue;
+    const bytes=fs.readFileSync(path.join(processorRoot,frame.file)),size=webpSize(bytes);
+    check(frame.index===index&&frame.progress===processor.frames[index].progress&&(!index||frame.progress>tier.frames[index-1].progress),`Ordered CPU pose ${suffix}/${index}`);
+    check(hash(bytes)===frame.sha256&&bytes.length===frame.bytes&&size?.[0]===width&&size?.[1]===height&&frame.width===width&&frame.height===height,`CPU asset integrity ${suffix}/${index}`);
+  }
+}
+check([...processor.frames,...processor.compact.frames].reduce((sum,f)=>sum+f.bytes,0)<=32*1024*1024,'CPU compressed tiers fit cache');
+const cpuHero=fs.readFileSync(path.join(processorRoot,'hero.webp'));
+check(hash(cpuHero)===processorNotice.heroSHA256&&webpSize(cpuHero)?.join('x')==='2560x2240','Selected CPU hero integrity');
+for(const variant of processorNotice.variants){
+  const bytes=fs.readFileSync(path.join(processorRoot,variant.file));
+  check(hash(bytes)===variant.sha256&&bytes.length===variant.bytes&&webpSize(bytes)?.join('x')===`${variant.width}x${variant.height}`,`CPU responsive hero ${variant.width}`);
+}
+check(hash(fs.readFileSync(path.join(root,processorNotice.source),'utf8').replaceAll('\r\n','\n'))===processorNotice.sourceSHA256,'CPU authored source provenance');
+check(html.includes('processor-sequence/hero.webp')&&!html.includes('keystroke-hero.webp'),'CPU is the active opening image');
+check(fs.readFileSync(path.join(root,'switch-scene.js'),'utf8').includes('processor-sequence/manifest.json'),'CPU is the active scroll sequence');
 check(hash(pdf)==='1e9c5a727407089a81f3761cc1530ab8eddbfad3993c7ba137d8e52020909f9d','Approved one-page PDF with verified portfolio link');
 check(fs.existsSync('.nojekyll'),'Buildless GitHub Pages deployment');
 check(!fs.existsSync('.openai'),'No former hosting configuration');

@@ -1,11 +1,11 @@
 /**
- * A Blender-rendered input study. Native scrolling owns time and progress;
+ * A Blender-rendered processor study. Native scrolling owns time and progress;
  * compressed images warm ahead of scrolling; a bounded moving decode window
  * paints complete frames without putting network round trips in the scroll path.
  * No decoder seek loop, WebGL context, wheel interception or animation loop.
  */
 const scenes=new WeakMap();
-const MANIFEST_URL=new URL('./shared/assets/product/key-sequence/manifest.json',import.meta.url);
+const MANIFEST_URL=new URL('./shared/assets/product/processor-sequence/manifest.json',import.meta.url);
 const MAX_CANVAS_PIXELS=1_500_000;
 const MAX_BITMAP_BYTES=48*1024*1024;
 const MAX_ENCODED_BYTES=32*1024*1024;
@@ -32,7 +32,7 @@ export async function createSwitchScene(host,{signal}={}){
   const saveData=typeof navigator==='object'&&navigator.connection?.saveData===true;
   let manifest=null,resizeObserver=null,dead=false,visible=!document.hidden;
   let width=0,height=0,sizeDirty=true,bitmapBytes=0,clock=0,renderCount=0;
-  let progress=.42,wanted=42,painted=-1,direction=-1,drawTier=640;
+  let progress=0,wanted=0,painted=-1,direction=1,drawTier=640;
   let lastDrawWidth=0,lastDrawHeight=0,encodedBytes=0,fetchCount=0,decodeCount=0,decodeTotal=0;
   const owned=()=>scenes.get(host)===api;
   const quiet=()=>document.documentElement.classList.contains('motion-off')||reduced.matches;
@@ -47,10 +47,10 @@ export async function createSwitchScene(host,{signal}={}){
     data('switchFetchCount',String(fetchCount));
     data('switchDecodeMs',decodeCount?(decodeTotal/decodeCount).toFixed(2):'0');
   };
-  const phase=value=>value<.25?'exploded':value<.42?'seat':value<.60?'press':value<.80?'signal':'settled';
+  const phase=value=>value<.1?'closed':value<.8?'opening':'expanded';
   const frameFor=(index,tier=drawTier)=>tier<=960&&manifest.compact?manifest.compact.frames[index]:manifest.frames[index];
-  // Source poses are denser during the first cap lift. Progress is physical
-  // scene time, not the frame's ordinal position in this nonuniform sequence.
+  // Use physical scene progress so the player also supports denser sampling
+  // where a future render needs it, without changing its scroll choreography.
   function nearestFrame(value){
     if(!manifest)return Math.round(value*100);
     const frames=manifest.frames;
@@ -116,7 +116,7 @@ export async function createSwitchScene(host,{signal}={}){
   }
   function present(){
     if(cache.has(wanted))return paint(wanted);
-    const reference=painted<0?(manifest?.initialIndex||42):painted;
+    const reference=painted<0?(manifest?.initialIndex??0):painted;
     const distance=Math.abs(wanted-reference),catchingUp=distance>MAX_FRAME_LAG;
     let nearest=null,nearestDistance=Infinity;
     for(const index of cache.keys()){
@@ -304,7 +304,7 @@ export async function createSwitchScene(host,{signal}={}){
     if(!response.ok)throw new Error('Manifest unavailable');
     const source=await response.json();
     if(dead||signal?.aborted)return api;
-    if(source.version!==1||source.width!==1600||source.height!==1400||!Number.isInteger(source.frameCount)||source.frameCount<101||source.frameCount>401||!Number.isInteger(source.initialIndex)||!Array.isArray(source.frames)||source.frames.length!==source.frameCount||source.frames[0]?.progress!==0||source.frames.at(-1)?.progress!==1||source.frames[source.initialIndex]?.progress!==.42)throw new Error('Invalid sequence manifest');
+    if(source.version!==1||source.width!==1280||source.height!==1120||!Number.isInteger(source.frameCount)||source.frameCount<101||source.frameCount>401||!Number.isInteger(source.initialIndex)||!Array.isArray(source.frames)||source.frames.length!==source.frameCount||source.frames[0]?.progress!==0||source.frames.at(-1)?.progress!==1||source.frames[source.initialIndex]?.progress!==0)throw new Error('Invalid sequence manifest');
     for(let index=0;index<source.frameCount;index++){
       const frame=source.frames[index];
       if(frame.index!==index||frame.file!==`key-${String(index).padStart(3,'0')}.webp`||frame.width!==source.width||frame.height!==source.height||typeof frame.progress!=='number'||!Number.isFinite(frame.progress)||frame.progress<0||frame.progress>1||(index&&frame.progress<=source.frames[index-1].progress)||!Number.isInteger(frame.bytes)||frame.bytes<1||frame.bytes>4*1024*1024||!/^[a-f0-9]{64}$/.test(frame.sha256))throw new Error('Invalid sequence frame');

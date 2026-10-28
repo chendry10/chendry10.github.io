@@ -36,7 +36,7 @@ const style=(el,key,value)=>{if(el&&el.style[key]!==value)el.style[key]=value;};
 const data=(el,key,value)=>{if(el.dataset[key]!==value)el.dataset[key]=value;};
 let metrics={},width=innerWidth,height=innerHeight,still=true,layoutDirty=true;
 let frame=0,lastTime=0,poses=null,hidden=document.hidden,renderCount=0;
-let key=null,keyAbort=null,keyTicket=0,keyLoading=false,keyLatest=.42,idle=0;
+let key=null,keyAbort=null,keyTicket=0,keyLoading=false,keyLatest=0,idle=0;
 const quiet=()=>root.classList.contains('motion-off')||osReduced.matches||innerWidth<=900;
 function schedule(){if(!hidden&&!frame)frame=requestAnimationFrame(render);}
 function measure(){
@@ -56,7 +56,7 @@ function releaseKey(){
 function warmKey(){
   if(still||hidden||key||keyLoading)return;
   keyLoading=true;const ticket=++keyTicket;keyAbort=new AbortController();const signal=keyAbort.signal;
-  import('./switch-scene.js?v=fa17226de184').then(({createSwitchScene})=>createSwitchScene(keyHost,{signal})).then(controller=>{
+  import('./switch-scene.js?v=f006b3fa2024').then(({createSwitchScene})=>createSwitchScene(keyHost,{signal})).then(controller=>{
     if(signal.aborted||ticket!==keyTicket||quiet()){controller.dispose();return;}
     key=controller;keyLoading=false;controller.setProgress(keyLatest);schedule();
   }).catch(()=>{if(ticket===keyTicket){keyLoading=false;data(keyHost,'switchState','fallback');}});
@@ -72,16 +72,9 @@ function targetPose(y){
 }
 function near(m,y){return y+height*1.25>m.top&&y-height*.25<m.top+m.height;}
 function inputPose(p){
-  if(p<.04)return .42;
-  if(p<.05)return mix(.42,.38,ease(part(p,.04,.05)));
-  // Give the cap's lift its own full fifth of the scroll journey. The denser
-  // source poses here prevent visible stepping without adding input delay.
-  if(p<.25)return mix(.38,.29,ease(part(p,.05,.25)));
-  if(p<.36)return mix(.29,.04,ease(part(p,.25,.36)));
-  if(p<.60)return mix(.04,.44,ease(part(p,.36,.60)));
-  if(p<.68)return mix(.44,.60,ease(part(p,.60,.68)));
-  if(p<.78)return mix(.60,.80,ease(part(p,.68,.78)));
-  return mix(.80,1,ease(part(p,.78,.90)));
+  // Unfold the complete CPU before the actual game arrives, then hold the
+  // expanded pose through the handoff. Native scrolling still owns time.
+  return ease(part(p,.05,.65));
 }
 function render(now){
   frame=0;if(hidden)return;
@@ -118,7 +111,7 @@ function render(now){
       if(product.inert!==(arrival<.985))product.inert=arrival<.985;
     }
     style(responseHeading,'opacity',ease(part(p,.76,.84)).toFixed(4));
-    const phase=p<.60?0:p<.68?1:p<.78?2:3;
+    const phase=p<.22?0:p<.46?1:p<.73?2:3;
     data(opening,'narrativePhase',p<.12?'identity':['assembly','contact','signal','response'][phase]);
     phases.forEach((el,i)=>data(el,'active',String(i===phase)));
     if(key&&!still&&p<.9)key.setProgress(keyLatest);
