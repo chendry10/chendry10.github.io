@@ -4,6 +4,14 @@ import assert from 'node:assert/strict';
 import {pathToFileURL} from 'node:url';
 
 const source=fs.readFileSync('switch-scene.js','utf8');
+const motion=fs.readFileSync('motion.js','utf8');
+const poseSource=motion.match(/function inputPose\(p\)\{[\s\S]*?\n\}/)?.[0];
+assert.ok(poseSource,'Opening pose mapping is present');
+const inputPose=vm.runInNewContext(`const clamp=n=>Math.max(0,Math.min(1,n));const part=(p,a,b)=>clamp((p-a)/(b-a));const ease=t=>t*t*(3-2*t);const mix=(a,b,t)=>a+(b-a)*t;${poseSource};inputPose`);
+assert.equal(inputPose(.05),.38,'First lift starts at five percent of the opening');
+assert.equal(inputPose(.25),.29,'First lift owns twenty percent of the scroll distance');
+assert.ok(Math.abs(inputPose(.15)-.335)<1e-9,'Mid-lift lands at the middle physical pose');
+for(const p of[.04,.05,.25,.36,.60,.68,.78,.90])assert.ok(Math.abs(inputPose(p-1e-8)-inputPose(p+1e-8))<.00001,'Pose mapping stays continuous across chapter boundaries');
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
 async function fixture({code=source,latency=70,decodeLatency=25,width=760,height=665,change,saveData=false,failFirst=false}={}){
   let now=0,fetches=0,decoders=0,maxFetches=0,maxDecoders=0,cancelled=0;
@@ -85,8 +93,8 @@ await initial.move(140);await initial.advance(400);await initial.move(20);await 
 assert.equal(initial.requests.length,calls,'Evicted decoded frames are rebuilt without refetching');
 assert.equal(initial.draws.at(-1).index,20);
 assert.ok(Number(initial.host.dataset.switchBitmapBytes)<=48*1024*1024);
-assert.ok(Number(initial.host.dataset.switchEncodedBytes)<=20*1024*1024);
-assert.ok(Number(initial.host.dataset.switchBitmapBytes)+20*1024*1024+2*1600*1400*4+960*840*4<=96*1024*1024);
+assert.ok(Number(initial.host.dataset.switchEncodedBytes)<=32*1024*1024);
+assert.ok(Number(initial.host.dataset.switchBitmapBytes)+32*1024*1024+2*1600*1400*4+960*840*4<=112*1024*1024);
 initial.api.dispose();await initial.advance(500);assert.ok(initial.bitmaps.every(b=>b.closed));assert.equal(initial.host.children.length,0);assert.equal(initial.host.dataset.switchEncodedBytes,'0');
 
 const fast=await fixture();await fast.advance(100);fast.api.setProgress(.1);await fast.advance(5);fast.api.setProgress(.8);await fast.advance(500);assert.equal(fast.draws.at(-1).index,160,'Rapid jump cannot flash an obsolete completion');
@@ -96,6 +104,27 @@ fast.doc.dispatchEvent(Object.assign(new Event('portfolio:motion'),{detail:{off:
 const aborted=await fixture();aborted.abort.abort();await aborted.advance(500);assert.equal(aborted.draws.length,0);assert.equal(aborted.host.children.length,0);
 
 const invalid=await fixture({change:m=>{m.frames[3].file='../bad.webp';}});assert.equal(invalid.host.dataset.switchState,'fallback');assert.equal(invalid.requests.length,0);
+const unordered=await fixture({change:m=>{m.frames[3].progress=m.frames[2].progress;}});assert.equal(unordered.host.dataset.switchState,'fallback');assert.equal(unordered.requests.length,0);
+const nonuniform=await fixture({change:m=>{
+  const positions=m.frames.map(f=>f.progress);
+  for(let p=291;p<380;p++)if(p%5)positions.push(p/1000);
+  positions.sort((a,b)=>a-b);
+  m.frames=positions.map((progress,index)=>({index,progress,file:`key-${String(index).padStart(3,'0')}.webp`,width:1600,height:1400,bytes:60000,sha256:index.toString(16).padStart(64,'0')}));
+  m.frameCount=m.frames.length;m.initialIndex=positions.indexOf(.42);
+}});
+await nonuniform.advance(6500);assert.equal(nonuniform.host.dataset.switchProgress,'0.4200','Initial source pose survives nonuniform indexing');
+for(const progress of[.379,.335,.291,.335,.379]){nonuniform.api.setProgress(progress);await nonuniform.advance(300);assert.equal(nonuniform.host.dataset.switchProgress,progress.toFixed(4),'Dense cap pose is selected by scene progress');}
+nonuniform.api.setProgress(.3354);await nonuniform.advance(300);assert.equal(nonuniform.host.dataset.switchProgress,'0.3350','Nearest physical pose selected between dense samples');
+nonuniform.api.setProgress(.38);await nonuniform.advance(300);
+const denseErrors=[];
+for(let step=0;step<=360;step++){
+  const target=step<=180?.38-.09*step/180:.29+.09*(step-180)/180;
+  nonuniform.api.setProgress(target);await nonuniform.advance(1000/60);
+  denseErrors.push(Math.abs(target-Number(nonuniform.host.dataset.switchProgress)));
+}
+denseErrors.sort((a,b)=>a-b);
+assert.ok(denseErrors[Math.floor(denseErrors.length*.95)]<=.00101,'Slow dense first lift and reversal stay within one physical pose at 60 Hz input');
+nonuniform.api.dispose();await nonuniform.advance(300);assert.ok(nonuniform.bitmaps.every(b=>b.closed));
 const oversize=await fixture({change:m=>{m.frames.forEach(f=>f.bytes=500000);}});assert.equal(oversize.host.dataset.switchState,'fallback');assert.equal(oversize.requests.length,0);
 const dedup=await fixture({change:m=>{m.frames[85].sha256=m.frames[84].sha256;}});await dedup.advance(5000);assert.equal(dedup.requests.length,200,'Identical held poses share compressed storage');dedup.api.dispose();await dedup.advance(300);
 const saver=await fixture({saveData:true});await saver.advance(5000);assert.ok(saver.requests.length<30,'Save-Data limits downloads to the nearby window');saver.api.dispose();await saver.advance(300);

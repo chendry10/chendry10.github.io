@@ -23,7 +23,7 @@ The animation entry and deferred key renderer use content-versioned URLs so retu
 
 ## Sources and boundaries
 
-- `motion.js`, `switch-scene.js`, `product-bridge.js`, `score-folio.js` and `score-journey.js` contain the visual choreography. One demand-driven scheduler follows native scrolling; the game and score each retain their identity through their handoffs. The key uses 201 pre-rendered frames with bounded bitmap decoding. Reduced motion and tablet/phone layouts use a matching still and native reading positions.
+- `motion.js`, `switch-scene.js`, `product-bridge.js`, `score-folio.js` and `score-journey.js` contain the visual choreography. One demand-driven scheduler follows native scrolling; the game and score each retain their identity through their handoffs. The key uses 273 pre-rendered frames (91 poses across the first keycap lift) with bounded bitmap decoding. Reduced motion and tablet/phone layouts use a matching still and native reading positions.
 - `shared/lyre-demo.js` implements the browser-local director/member demonstration; it does not connect to a live band or private music library.
 - Media source notices and licenses are beside the files under `shared/assets/` and `shared/vendor/`. The hardware study uses Santiago Castelo's MIT-licensed Cherry-profile keycap CAD, including its internal ribs and switch/stabilizer sockets. The switch mechanism, keyboard case, plate, materials and lighting are independently authored. Blender 4.5.15 Cycles renders the 3840×3360 hero at 1536 samples and the 1600×1400 sequence at 384 samples using the same scene and Poly Haven's CC0 Studio Small 09 environment. These are AgX-tonemapped SDR exports. Illustrative music artwork is distinguished from actual product captures. Previously used keyboard photographs remain archived in the assets but are not loaded by the page.
 - No student records, private application source, analytics trackers, credentials or backend API are included. Local QA evidence stays outside the publication.
@@ -32,7 +32,7 @@ This repository is the canonical hosting source for the portfolio.
 
 ## Reproducing the hardware study
 
-The scroll player warms compressed frames after the opening pose paints, deduplicates identical held poses, and decodes a bounded neighbourhood ahead of the requested frame. Network transfers and decoding have separate concurrency limits (four and two). The decoded cache stays at or below 48 MiB; compressed images have a 20 MiB cap. The conservative owned-resource model is 96 MiB, including source decode buffers and canvas, not a claim about total browser memory. Save-Data clients load only the nearby window; mobile and reduced-motion visitors keep the still.
+The scroll player warms compressed frames after the opening pose paints, deduplicates identical held poses, and decodes a bounded neighbourhood ahead of the requested frame. Network transfers and decoding have separate concurrency limits (four and two). The decoded cache stays at or below 48 MiB; compressed images have a 32 MiB cap. The conservative owned-resource model is 112 MiB, including source decode buffers and canvas, not a claim about total browser memory. Save-Data clients load only the nearby window; mobile and reduced-motion visitors keep the still.
 
 The 960px sequence is exported directly from the same original PNG poses with `node scripts/prepare-key-compact.mjs /path/sequence`. Medium displays decode these at their native size; larger displays retain the 1600px frames. This avoids resizing a full-resolution image during each scroll update. Run `npm test` for asset integrity and deterministic latency/lifecycle regression checks; the synthetic timing test is not a browser FPS measurement.
 
@@ -47,6 +47,9 @@ The defaults select a satin titanium Enter key, cinematic lighting, opaque studi
 blender --background --factory-startup --python-exit-code 1 --python scripts/render-key.py -- --cad "/path/Cherry Keycaps Full.fbx" --hdri /path/studio_small_09_4k.exr --font /path/arial.ttf --output-dir /path/sequence --width 1600 --height 1400 --samples 384 --frames 201
 blender --background --factory-startup --python-exit-code 1 --python scripts/render-key.py -- --cad "/path/Cherry Keycaps Full.fbx" --hdri /path/studio_small_09_4k.exr --font /path/arial.ttf --output-dir /path/hero --width 3840 --height 3360 --samples 1536 --progress .42
 node scripts/prepare-key-assets.mjs /path/sequence /path/hero/key-p420.png
+node scripts/prepare-key-compact.mjs /path/sequence
+blender --background --factory-startup --python-exit-code 1 --python scripts/render-key-lift.py -- --cad "/path/Cherry Keycaps Full.fbx" --hdri /path/studio_small_09_4k.exr --font /path/arial.ttf --output-dir /path/dense-lift
+node scripts/prepare-key-dense.mjs /path/dense-lift
 ```
 
 Use `--transparent` (or `--no-opaque-floor`) for transparent film and `--no-dof` to disable depth of field. `--save-only` builds and saves the scene without rendering. Preview dimensions and samples can be lowered through their explicit flags.

@@ -88,7 +88,7 @@ check(sequence.frameCount===keyStill.sequence.frames&&sequence.width===keyStill.
 const mechanical=keyStill.mechanismValidation;
 check(mechanical?.sourceSHA256===keyStill.sourceSHA256&&mechanical?.positions===1001&&mechanical?.surfaceIntersections===0&&mechanical?.framingFailures===0&&mechanical?.minimumCapFrameMargin>=.045&&mechanical?.springMinimumTurnClearanceMm>0,'Current rendered mechanism has matching clearance and framing evidence');
 if(mechanical?.auditSource)check(hash(fs.readFileSync(path.join(root,mechanical.auditSource),'utf8').replaceAll('\r\n','\n'))===mechanical.auditSHA256,'Mechanical audit source matches its recorded result');
-check(sequence.frames.length===sequence.frameCount&&[101,201].includes(sequence.frameCount),'Complete bounded key sequence');
+check(sequence.frames.length===sequence.frameCount&&Number.isInteger(sequence.frameCount)&&sequence.frameCount>=101&&sequence.frameCount<=401,'Complete bounded key sequence');
 check(sequence.frames[0].progress===0&&sequence.frames.at(-1).progress===1&&sequence.frames[sequence.initialIndex].progress===.42,'Sequence covers the full mechanism and exact hero pose');
 let sequenceBytes=0;
 for(const [index,frame]of sequence.frames.entries()){
@@ -98,7 +98,7 @@ for(const [index,frame]of sequence.frames.entries()){
   check(hash(bytes)===frame.sha256&&bytes.length===frame.bytes,`Key frame integrity ${index}`);
   check(size?.[0]===sequence.width&&size?.[1]===sequence.height&&frame.width===sequence.width&&frame.height===sequence.height,`Native key frame dimensions ${index}`);
 }
-check(sequenceBytes<=20*1024*1024,'Compressed key sequence stays within its delivery budget');
+check(sequenceBytes<=32*1024*1024,'Compressed key sequence stays within its delivery budget');
 if(sequence.compact){
   check(sequence.compact.width===960&&sequence.compact.height===840&&sequence.compact.frames.length===sequence.frameCount,'Complete pre-sized medium sequence');
   for(const [index,frame]of sequence.compact.frames.entries()){
@@ -109,7 +109,7 @@ if(sequence.compact){
     check(size?.[0]===960&&size?.[1]===840&&frame.width===960&&frame.height===840,`Compact key dimensions ${index}`);
   }
   const unique=new Map([...sequence.frames,...sequence.compact.frames].map(f=>[f.sha256,f.bytes]));
-  check([...unique.values()].reduce((sum,n)=>sum+n,0)<=20*1024*1024,'Both sequence tiers fit bounded compressed cache');
+  check([...unique.values()].reduce((sum,n)=>sum+n,0)<=32*1024*1024,'Both sequence tiers fit bounded compressed cache');
 }
 check(hash(pdf)==='1e9c5a727407089a81f3761cc1530ab8eddbfad3993c7ba137d8e52020909f9d','Approved one-page PDF with verified portfolio link');
 check(fs.existsSync('.nojekyll'),'Buildless GitHub Pages deployment');
