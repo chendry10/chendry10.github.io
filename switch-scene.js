@@ -8,8 +8,8 @@ const scenes=new WeakMap();
 const MANIFEST_URL=new URL('./shared/assets/product/key-sequence/manifest.json',import.meta.url);
 const MAX_CANVAS_PIXELS=1_500_000;
 const MAX_BITMAP_BYTES=48*1024*1024;
-const MAX_ENCODED_BYTES=20*1024*1024;
-const MAX_WORKING_BYTES=96*1024*1024;
+const MAX_ENCODED_BYTES=32*1024*1024;
+const MAX_WORKING_BYTES=112*1024*1024;
 const CONCURRENCY=2;
 const FETCH_CONCURRENCY=4;
 const MAX_FRAME_LAG=8;
@@ -49,6 +49,15 @@ export async function createSwitchScene(host,{signal}={}){
   };
   const phase=value=>value<.25?'exploded':value<.42?'seat':value<.60?'press':value<.80?'signal':'settled';
   const frameFor=(index,tier=drawTier)=>tier<=960&&manifest.compact?manifest.compact.frames[index]:manifest.frames[index];
+  // Source poses are denser during the first cap lift. Progress is physical
+  // scene time, not the frame's ordinal position in this nonuniform sequence.
+  function nearestFrame(value){
+    if(!manifest)return Math.round(value*100);
+    const frames=manifest.frames;
+    let lo=0,hi=frames.length-1;
+    while(lo<hi){const mid=(lo+hi)>>1;if(frames[mid].progress<value)lo=mid+1;else hi=mid;}
+    return lo>0&&value-frames[lo-1].progress<frames[lo].progress-value?lo-1:lo;
+  }
   function canvasSize(){
     if(dead||!context||width<2||height<2)return false;
     if(!sizeDirty)return true;
@@ -99,7 +108,7 @@ export async function createSwitchScene(host,{signal}={}){
     lastDrawWidth=canvas.width;lastDrawHeight=canvas.height;
     data('switchState','ready');data('switchFrame',String(index));
     if(owned())delete host.dataset.switchFallback;
-    const shown=index/((manifest?.frameCount||101)-1);
+    const shown=manifest.frames[index].progress;
     data('switchProgress',shown.toFixed(4));data('switchPhase',phase(shown));
     data('switchFrameLag',String(Math.abs(wanted-index)));
     data('switchRenderCount',String(++renderCount));data('switchDrawcalls','0');
@@ -245,7 +254,7 @@ export async function createSwitchScene(host,{signal}={}){
     setProgress(value){
       if(dead)return;
       progress=clamp(Number(value));
-      const next=Math.round(progress*((manifest?.frameCount||101)-1));
+      const next=nearestFrame(progress);
       if(next!==wanted){direction=Math.sign(next-wanted)||direction;wanted=next;failures.delete(`${wanted}:${drawTier}`);if(manifest)networkFailures.delete(frameFor(wanted).sha256);cancelFarRequests();}
       data('switchTargetProgress',progress.toFixed(4));
       data('switchFrameLag',String(painted<0?0:Math.abs(wanted-painted)));
@@ -295,10 +304,10 @@ export async function createSwitchScene(host,{signal}={}){
     if(!response.ok)throw new Error('Manifest unavailable');
     const source=await response.json();
     if(dead||signal?.aborted)return api;
-    if(source.version!==1||source.width!==1600||source.height!==1400||![101,201].includes(source.frameCount)||source.initialIndex!==Math.round(.42*(source.frameCount-1))||!Array.isArray(source.frames)||source.frames.length!==source.frameCount)throw new Error('Invalid sequence manifest');
+    if(source.version!==1||source.width!==1600||source.height!==1400||!Number.isInteger(source.frameCount)||source.frameCount<101||source.frameCount>401||!Number.isInteger(source.initialIndex)||!Array.isArray(source.frames)||source.frames.length!==source.frameCount||source.frames[0]?.progress!==0||source.frames.at(-1)?.progress!==1||source.frames[source.initialIndex]?.progress!==.42)throw new Error('Invalid sequence manifest');
     for(let index=0;index<source.frameCount;index++){
       const frame=source.frames[index];
-      if(frame.index!==index||frame.file!==`key-${String(index).padStart(3,'0')}.webp`||frame.width!==source.width||frame.height!==source.height||typeof frame.progress!=='number'||!Number.isFinite(frame.progress)||Math.abs(frame.progress-index/(source.frameCount-1))>.000001||!Number.isInteger(frame.bytes)||frame.bytes<1||frame.bytes>4*1024*1024||!/^[a-f0-9]{64}$/.test(frame.sha256))throw new Error('Invalid sequence frame');
+      if(frame.index!==index||frame.file!==`key-${String(index).padStart(3,'0')}.webp`||frame.width!==source.width||frame.height!==source.height||typeof frame.progress!=='number'||!Number.isFinite(frame.progress)||frame.progress<0||frame.progress>1||(index&&frame.progress<=source.frames[index-1].progress)||!Number.isInteger(frame.bytes)||frame.bytes<1||frame.bytes>4*1024*1024||!/^[a-f0-9]{64}$/.test(frame.sha256))throw new Error('Invalid sequence frame');
     }
     if(source.compact){
       const compact=source.compact;
@@ -310,7 +319,7 @@ export async function createSwitchScene(host,{signal}={}){
     }
     const unique=new Map([...source.frames,...(source.compact?.frames||[])].map(frame=>[frame.sha256,frame.bytes]));
     if([...unique.values()].reduce((sum,bytes)=>sum+bytes,0)>MAX_ENCODED_BYTES)throw new Error('Sequence exceeds preload budget');
-    manifest=source;wanted=Math.round(progress*(source.frameCount-1));sizeDirty=true;
+    manifest=source;wanted=nearestFrame(progress);sizeDirty=true;
     data('switchState','prepared');redraw();
     return api;
   }catch(error){

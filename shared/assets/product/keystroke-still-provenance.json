@@ -13,8 +13,9 @@
     "manifest": "key-sequence/manifest.json",
     "width": 1600,
     "height": 1400,
-    "frames": 201,
-    "samples": 384
+    "frames": 273,
+    "samples": 384,
+    "sampling": "Original .005 samples plus .001 samples across the first keycap lift (.29-.38). All frames rendered in Blender Cycles."
   },
   "colour": "AgX SDR WebP output; no HDR-display claim",
   "physicalReference": "https://www.cherry.de/en-gb/product/mx2a-black",
