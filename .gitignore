@@ -1,3 +1,4 @@
 node_modules/
 qa/
 *.tar.gz
+key-renders/

@@ -1,16 +1,72 @@
 {
-  "file": "keystroke-still.jpg",
-  "sha256": "9260e2bf1e5ef936139e901e4fd233197b24c793cbee9cde728350a01760f51b",
-  "kind": "Authored procedural 3D render; not AI-generated photography",
-  "source": "switch-scene.js",
+  "file": "keystroke-cycles-hero.webp",
+  "sha256": "cb464b9d713dbb18cd79874c67a3ae460c191120f067f1f86cae8f681059f509",
+  "width": 3840,
+  "height": 3360,
+  "kind": "Blender Cycles product illustration using licensed CAD keycaps",
+  "renderer": "Blender 4.5.15 LTS / Cycles OptiX",
+  "samples": 1536,
+  "source": "scripts/render-key.py",
+  "sourceSHA256": "f4f62044ef75242e835fbc0092c3d6c8411a7ab795f45c166508783c72dcc7d7",
   "sourceProgress": 0.42,
-  "capturePixels": [
-    1600,
-    1400
+  "sequence": {
+    "manifest": "key-sequence/manifest.json",
+    "width": 1600,
+    "height": 1400,
+    "frames": 201,
+    "samples": 384
+  },
+  "colour": "AgX SDR WebP output; no HDR-display claim",
+  "physicalReference": "https://www.cherry.de/en-gb/product/mx2a-black",
+  "environment": {
+    "name": "Studio Small 09",
+    "author": "Sergej Majboroda",
+    "source": "https://polyhaven.com/a/studio_small_09",
+    "license": "CC0",
+    "licenseURL": "https://polyhaven.com/license",
+    "sourceSHA256": "bbb83755cf731a87373bdd25e28b4a74f58c8c8a02bf348e960635265ffda558"
+  },
+  "description": "A brandless ANSI keyboard with licensed keycap profiles, ribs and stem sockets. Independently authored hollow switch and stabilizers, case and studio rig. The metal Enter, upper housing, amber stem, constant-thickness spring and lower housing separate in stages along one axis, then assemble and press. A camera arc reveals the layers. Actual Typing Agent gameplay follows the illustrative input study.",
+  "keycaps": {
+    "notice": "cherry-keycaps-source.json",
+    "license": "cherry-keycaps-MIT-LICENSE.txt",
+    "author": "Santiago Castelo",
+    "profile": "Cherry R3 2.25u Enter",
+    "material": "Illustrative satin titanium Enter among charcoal PBT caps"
+  },
+  "photographicRig": {
+    "lensMillimetres": 85,
+    "fStop": 40,
+    "look": "cinematic",
+    "millimetreScale": true,
+    "keyPitchMillimetres": 19.05,
+    "keyTravelMillimetres": 4
+  },
+  "variants": [
+    {
+      "file": "keystroke-cycles-hero-1600.webp",
+      "width": 1600,
+      "height": 1400,
+      "bytes": 68284,
+      "sha256": "e415be146304003e6ae415cacf3cfd48bda8fb28c6b134bb72cf838b00f74f41"
+    },
+    {
+      "file": "keystroke-cycles-hero-2400.webp",
+      "width": 2400,
+      "height": 2100,
+      "bytes": 129280,
+      "sha256": "8e66fcf04593f7e689d7a09eda8a42c3b0692d9a4adf7fffceeccb41923e805f"
+    }
   ],
-  "actualCanvasPixels": 2240000,
-  "interactivePixelBudget": 1500000,
-  "description": "Static fallback of the same key shown by the interactive WebGL scene. Rendered locally with the existing licensed Three.js runtime.",
-  "sourceSHA256": "e3de36b7c310ade426d334a4439f36472451d173f83c78de42b7f2dc02bebcfb",
-  "drawCalls": 27
+  "mechanismValidation": {
+    "sourceSHA256": "f4f62044ef75242e835fbc0092c3d6c8411a7ab795f45c166508783c72dcc7d7",
+    "positions": 1001,
+    "surfaceIntersections": 0,
+    "framingFailures": 0,
+    "minimumCapFrameMargin": 0.06520038843154907,
+    "springMinimumTurnClearanceMm": 0.022179337539749405,
+    "auditSource": "scripts/audit-key.py",
+    "auditSHA256": "14929d31a9232ebddff67a0cba4e3f3cb9faeecc1da114bb543b99c3d155ef42",
+    "scope": "Evaluated bevelled/curved focal mechanism mesh surface intersections in mm, plus analytic adjacent-coil clearance and projected cap framing; no bounding-box-only collision verdict. This is a geometry check, not a physical simulation or manufacturing certification."
+  }
 }

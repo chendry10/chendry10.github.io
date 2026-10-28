@@ -1,0 +1,18 @@
+{
+  "asset": "Cherry Keycaps Full.fbx",
+  "author": "Santiago Castelo",
+  "copyright": "Copyright (c) 2020 Santiago Castelo",
+  "license": "MIT",
+  "licenseFile": "cherry-keycaps-MIT-LICENSE.txt",
+  "repository": "https://github.com/endeavoursc/cherry-mx-keycaps",
+  "commit": "3b94e3c7f8ed465917c1975ae0802d8965d5066b",
+  "commitUrl": "https://github.com/endeavoursc/cherry-mx-keycaps/commit/3b94e3c7f8ed465917c1975ae0802d8965d5066b",
+  "assetUrl": "https://github.com/endeavoursc/cherry-mx-keycaps/blob/3b94e3c7f8ed465917c1975ae0802d8965d5066b/Cherry%20Keycaps%20Full.fbx",
+  "downloadUrl": "https://raw.githubusercontent.com/endeavoursc/cherry-mx-keycaps/3b94e3c7f8ed465917c1975ae0802d8965d5066b/Cherry%20Keycaps%20Full.fbx",
+  "licenseUrl": "https://github.com/endeavoursc/cherry-mx-keycaps/blob/3b94e3c7f8ed465917c1975ae0802d8965d5066b/LICENSE",
+  "fileSHA256": "0af52b40462c71b098cd955fe763172f68cb798b1e5c0ae28fba9d458d2a2ae7",
+  "gitBlobSHA": "3051988ae133b7f20878d29a83a601238ae2c469",
+  "licenseSHA256": "b3abd19454b522e05471868104dccd0aa97fb231112cc2fc6647b50e9f90ffc1",
+  "usage": "Keycap CAD geometry, including internal ribs and switch/stabilizer sockets, is imported into the rendered hardware study. The raw CAD is not distributed by this site.",
+  "independentWork": "Switch mechanism, keyboard case, plate, materials, lighting and scroll choreography are independently authored. The assembly is brandless and does not claim to reproduce a commercial keyboard."
+}

@@ -12,8 +12,6 @@ const identity=[...document.querySelectorAll('.hero-identity,.hero-caption,.scro
 const keyHost=document.querySelector('.relay-key');
 const heading=document.querySelector('.relay-heading');
 const responseHeading=document.querySelector('.relay-response-heading');
-const circuit=document.querySelector('.relay-circuit');
-const current=document.querySelector('.relay-current');
 const product=document.querySelector('.relay-product');
 const bay=document.querySelector('[data-product-bay]');
 const phases=[...document.querySelectorAll('[data-relay-step]')];
@@ -58,7 +56,7 @@ function releaseKey(){
 function warmKey(){
   if(still||hidden||key||keyLoading)return;
   keyLoading=true;const ticket=++keyTicket;keyAbort=new AbortController();const signal=keyAbort.signal;
-  import('./switch-scene.js?v=c69d4640b2fd').then(({createSwitchScene})=>createSwitchScene(keyHost,{signal})).then(controller=>{
+  import('./switch-scene.js?v=13269a485439').then(({createSwitchScene})=>createSwitchScene(keyHost,{signal})).then(controller=>{
     if(signal.aborted||ticket!==keyTicket||quiet()){controller.dispose();return;}
     key=controller;keyLoading=false;controller.setProgress(keyLatest);schedule();
   }).catch(()=>{if(ticket===keyTicket){keyLoading=false;data(keyHost,'switchState','fallback');}});
@@ -109,8 +107,6 @@ function render(now){
     const arrival=ease(part(p,.68,.84));
     style(keyHost,'opacity',(1-ease(part(p,.67,.82))).toFixed(4));
     style(keyHost,'transform',`translate3d(${(-arrival*width*.14).toFixed(2)}px,${(-arrival*height*.035).toFixed(2)}px,0) scale(${(1-.16*arrival).toFixed(4)})`);
-    style(circuit,'opacity',(ease(part(p,.52,.59))*(1-ease(part(p,.79,.88)))).toFixed(4));
-    style(current,'strokeDashoffset',(1-part(p,.54,.73)).toFixed(4));
     if(!ownsProduct){
       style(product,'opacity',arrival.toFixed(4));style(product,'visibility',arrival>.001?'visible':'hidden');
       style(product,'transform',`translate(-50%,-50%) translate3d(${((1-arrival)*width*.13).toFixed(2)}px,${((1-arrival)*65).toFixed(2)}px,0) rotateY(${(-12*(1-arrival)).toFixed(2)}deg) scale(${(.80+.20*arrival).toFixed(4)})`);
