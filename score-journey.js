@@ -3,6 +3,18 @@
  * The page owns scroll, scheduling and geometry invalidation. This layer never
  * changes product state, focus, broadcasts, scrolling or persistence.
  */
+export const SCORE_ARRIVAL_END=.30;
+export const scoreFolioProgress=value=>Math.max(0,Math.min(1,(value-SCORE_ARRIVAL_END)/(1-SCORE_ARRIVAL_END)));
+
+// Fixed viewport endpoints give the travelling sheet one continuous path.
+// In particular, no halfway heading-clearance branch can teleport the sheet.
+export function scoreArrivalPose({from,to,paperWidth,width,height},progress){
+  const p=Math.max(0,Math.min(1,progress)),t=p*p*(3-2*p);
+  const arc=Math.sin(t*Math.PI)**2,mix=(a,b)=>a+(b-a)*t;
+  const travelWidth=mix(from.w,paperWidth)+arc*Math.max(0,Math.min(450,width*.39)-Math.max(from.w,paperWidth));
+  return {x:mix(from.x,to.x)-arc*width*.045,y:mix(from.y,to.y)-arc*height*.06,z:to.z*t+arc*70,s:travelWidth/paperWidth,rx:to.rx*t-arc*9,ry:to.ry*t+arc*17,rz:to.rz*t-arc*10,captionOpacity:0};
+}
+
 export function createScoreJourney({music, scoreAct, demo}) {
   const source=music?.querySelector('.hero-score > img');
   const field=scoreAct?.querySelector('.score-routing-field');
@@ -92,7 +104,7 @@ export function createScoreJourney({music, scoreAct, demo}) {
       stackY:Math.min(74,Math.max(44,(fr.height-paperHeight-90)*.5)),
       slotX:fr.width*.165-paperWidth/2,
       begin:src.top+y+src.height*.5-height*.56,
-      enterEnd:pinStart+pinRange*.07,
+      enterEnd:pinStart+pinRange*SCORE_ARRIVAL_END,
       exitStart,liftEnd,approachStart,approachEnd,
     };
     write(scene,'width',`${fmt(fr.width)}px`);write(scene,'height',`${fmt(fr.height)}px`);
@@ -127,22 +139,16 @@ export function createScoreJourney({music, scoreAct, demo}) {
     // Match the real demo's single-column breakpoint, where there is no safe
     // side lane for a large sheet. All native evidence remains available.
     if(still||layout.width<=760||y<layout.begin){visible(false);restoreNative();setPhase('native');return;}
-    const p=Number.isFinite(scoreProgress)?clamp(scoreProgress):range(y,layout.pinStart,layout.progressEnd);
+    const p=Number.isFinite(scoreProgress)?clamp(scoreProgress):scoreFolioProgress(range(y,layout.pinStart,layout.progressEnd));
     const local=folioPose(p),originY=stageTop(y)+layout.fieldY;
     const native={x:layout.fieldX+local.x,y:originY+local.y,z:local.z,s:1,rx:local.rx,ry:local.ry,rz:local.rz,captionOpacity:smooth(range(smooth(range(p,.23,.66)),.48,.93))};
     if(y<layout.enterEnd){
-      const raw=range(y,layout.begin,layout.enterEnd),t=smooth(raw),arc=Math.sin(t*Math.PI);
-      const from=layout.source;
-      const desiredWidth=Math.min(450,layout.width*.39);
-      let top=mix(from.y-y,native.y,t)-arc*layout.height*.10;
-      // Keep the complete page in the viewing window until the folio arrives.
-      const travelWidth=mix(from.w,layout.paperWidth,t)+arc*Math.max(0,desiredWidth-Math.max(from.w,layout.paperWidth));
-      const maxTop=layout.height-travelWidth*(1700/2200)-66;
-      top=Math.max(100,Math.min(maxTop,top));
-      if(t>.52)top=Math.max(top,Math.min(maxTop,stageTop(y)+layout.headingBottom+18));
+      const raw=range(y,layout.begin,layout.enterEnd),t=smooth(raw);
+      const from={...layout.source,y:layout.source.y-layout.begin};
+      const to={...native,y:layout.fieldY+local.y};
       restore(targetImage);restoreOthers();write(source,'opacity','0');write(nativePaper,'opacity','0');
-      write(headingElement,'opacity',fmt(smooth(range(t,.78,1))));
-      paint({x:mix(from.x,native.x,t)-arc*layout.width*.045,y:top,z:native.z*t+arc*70,s:travelWidth/layout.paperWidth,rx:native.rx*t-arc*9,ry:native.ry*t+arc*17,rz:native.rz*t-arc*10,captionOpacity:0},originY);
+      write(headingElement,'opacity',fmt(smooth(range(t,.90,1))));
+      paint(scoreArrivalPose({from,to,paperWidth:layout.paperWidth,width:layout.width,height:layout.height},raw),originY);
       setPhase('trumpet-to-folio');return;
     }
     restore(source);restore(headingElement);

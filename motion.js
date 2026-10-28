@@ -1,5 +1,5 @@
 import {createScoreFolio} from './score-folio.js';
-import {createScoreJourney} from './score-journey.js';
+import {createScoreJourney,scoreFolioProgress} from './score-journey.js?v=08156aa07626';
 import {createGameplayFilm} from './gameplay-film.js';
 import {createProductBridge} from './product-bridge.js';
 
@@ -68,7 +68,7 @@ function prewarm(){
 }
 function targetPose(y){
   const progress=m=>clamp((y-m.top)/m.range);
-  return {opening:still?0:progress(metrics.opening),scores:still?1:progress(metrics.scores),music:still?1:clamp((y+height-metrics.music.top)/(height+metrics.music.height))};
+  return {opening:still?0:progress(metrics.opening),scores:still?1:scoreFolioProgress(progress(metrics.scores)),music:still?1:clamp((y+height-metrics.music.top)/(height+metrics.music.height))};
 }
 function near(m,y){return y+height*1.25>m.top&&y-height*.25<m.top+m.height;}
 function inputPose(p){
