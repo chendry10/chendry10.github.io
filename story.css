@@ -1,8 +1,8 @@
 /* One material world, two meaningful handoffs, and room to read between them. */
 .site-header{background:linear-gradient(180deg,var(--ground) 15%,transparent);padding-inline:max(32px,calc((100vw - 1510px)/2))}
 .site-header nav{gap:8px 24px;font-size:13px}
-/* 6.6 viewport heights of travel: exactly three times the original distance. */
-html.concerto-motion .concerto-opening{height:760svh}
+/* 3.3 viewport heights of travel: half the previous 6.6, plus the pinned viewport. */
+html.concerto-motion .concerto-opening{height:430svh}
 /* Arrival gets its own scroll beat before the three parts unfold. */
 html.concerto-motion .score-routing{height:360svh}
 .concerto-stage{background:var(--ground)}
