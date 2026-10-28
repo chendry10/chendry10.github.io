@@ -7,9 +7,23 @@ const root=path.resolve('.');
 const errors=[];let checks=0;
 const check=(ok,label)=>{checks++;if(!ok)errors.push(label);};
 const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
+function webpSize(bytes){
+  if(bytes.toString('ascii',0,4)!=='RIFF'||bytes.toString('ascii',8,12)!=='WEBP')return null;
+  const format=bytes.toString('ascii',12,16);
+  if(format==='VP8X')return [bytes.readUIntLE(24,3)+1,bytes.readUIntLE(27,3)+1];
+  if(format==='VP8 ')return [bytes.readUInt16LE(26)&16383,bytes.readUInt16LE(28)&16383];
+  if(format==='VP8L'){const bits=bytes.readUInt32LE(21);return [(bits&16383)+1,((bits>>>14)&16383)+1];}
+  return null;
+}
 const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(path.join(dir,e.name)):[path.join(dir,e.name)]);
 const files=[...walk(path.join(root,'shared')),...fs.readdirSync(root,{withFileTypes:true}).filter(e=>e.isFile()&&/\.(?:html|css|js|pdf|txt|xml)$/.test(e.name)).map(e=>path.join(root,e.name))],html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const localURL='https://portfolio.invalid/';
+const omitted=new Set(['.git','qa','node_modules','key-renders']);
+const publicationInventory=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>omitted.has(entry.name)?[]:entry.isDirectory()?publicationInventory(path.join(dir,entry.name)):[path.join(dir,entry.name)]);
+for(const file of publicationInventory(root)){
+  const relative=path.relative(root,file).replaceAll(path.sep,'/');
+  check(!/\.(?:blend\d*|exr|hdr|fbx|step|stp|key|pem|sqlite|csv|xlsx)$|(^|\/)\.env(?:\.|$)|^shared\/assets\/product\/key-sequence\/.*\.png$/i.test(relative),`No raw or private publication file: ${relative}`);
+}
 const allowedHosts=new Set(['chendry10.github.io','lyrelink.com','typingagent.com','github.com','www.linkedin.com','unsplash.com']);
 function reference(ref,from){
   if(ref.startsWith('#')){check(new RegExp(`\\bid=["']${ref.slice(1)}["']`).test(html),`Anchor ${ref}`);return;}
@@ -37,7 +51,7 @@ for(const m of html.matchAll(/\bsrcset="([^"]+)"/g))for(const item of m[1].split
 for(const file of files){
   const relative=path.relative(root,file).replaceAll(path.sep,'/');
   check(!fs.lstatSync(file).isSymbolicLink(),`No symlink: ${relative}`);
-  check(!/(^|\/)(qa|capture-frames|capture-direct|node_modules|\.git)(\/|$)|\.(?:csv|xlsx|sqlite|key|pem)$|(^|\/)\.env/i.test(relative),`Public artifact only: ${relative}`);
+  check(!/(^|\/)(qa|capture-frames|capture-direct|node_modules|\.git)(\/|$)|\.(?:csv|xlsx|sqlite|key|pem|blend\d*|exr|hdr|fbx|step|stp)$|(^|\/)\.env|^shared\/assets\/product\/key-sequence\/.*\.png$/i.test(relative),`Public artifact only: ${relative}`);
   if(/\.(?:html|css|js|json|xml|md|txt)$/.test(file)){
     try{new TextDecoder('utf-8',{fatal:true}).decode(fs.readFileSync(file));check(true,`UTF-8 ${relative}`);}
     catch{check(false,`Invalid UTF-8 ${relative}`);}
@@ -58,8 +72,33 @@ const scores=JSON.parse(fs.readFileSync(path.join(root,'shared/assets/lyrelink/m
 check(scores.length===9&&scores.every(s=>fs.existsSync(path.join(root,'shared/assets/lyrelink',s.file))),'All nine complete public parts');
 const pdf=fs.readFileSync(path.join(root,'shared/assets/Cameron-Hendry-Resume.pdf'));
 const keyStill=JSON.parse(fs.readFileSync(path.join(root,'shared/assets/product/keystroke-still-provenance.json')));
+const cadNotice=JSON.parse(fs.readFileSync(path.join(root,'shared/assets/product/cherry-keycaps-source.json')));
+check(cadNotice.license==='MIT'&&hash(fs.readFileSync(path.join(root,'shared/assets/product',cadNotice.licenseFile)))===cadNotice.licenseSHA256,'Licensed keycap CAD keeps its complete upstream MIT notice');
 check(hash(fs.readFileSync(path.join(root,'shared/assets/product',keyStill.file)))===keyStill.sha256,'Authored key fallback matches its provenance');
-check(keyStill.file.endsWith('.jpg')&&fs.readFileSync(path.join(root,'shared/assets/product',keyStill.file)).subarray(0,3).equals(Buffer.from([255,216,255])),'Hero still format agrees with its JPEG content type');
+const posterSize=webpSize(fs.readFileSync(path.join(root,'shared/assets/product',keyStill.file)));
+check(keyStill.file.endsWith('.webp')&&posterSize?.[0]===keyStill.width&&posterSize?.[1]===keyStill.height,'Hero still WebP dimensions agree with its provenance');
+for(const variant of keyStill.variants||[]){
+  const bytes=fs.readFileSync(path.join(root,'shared/assets/product',variant.file)),size=webpSize(bytes);
+  check(hash(bytes)===variant.sha256&&bytes.length===variant.bytes&&size?.[0]===variant.width&&size?.[1]===variant.height,`Responsive hero integrity ${variant.width}`);
+}
+check(hash(fs.readFileSync(path.join(root,keyStill.source),'utf8').replaceAll('\r\n','\n'))===keyStill.sourceSHA256,'Reproducible Blender source matches hero provenance');
+const sequenceRoot=path.join(root,'shared/assets/product/key-sequence');
+const sequence=JSON.parse(fs.readFileSync(path.join(sequenceRoot,'manifest.json')));
+check(sequence.frameCount===keyStill.sequence.frames&&sequence.width===keyStill.sequence.width&&sequence.height===keyStill.sequence.height,'Sequence agrees with its rendering provenance');
+const mechanical=keyStill.mechanismValidation;
+check(mechanical?.sourceSHA256===keyStill.sourceSHA256&&mechanical?.positions===1001&&mechanical?.surfaceIntersections===0&&mechanical?.framingFailures===0&&mechanical?.minimumCapFrameMargin>=.045&&mechanical?.springMinimumTurnClearanceMm>0,'Current rendered mechanism has matching clearance and framing evidence');
+if(mechanical?.auditSource)check(hash(fs.readFileSync(path.join(root,mechanical.auditSource),'utf8').replaceAll('\r\n','\n'))===mechanical.auditSHA256,'Mechanical audit source matches its recorded result');
+check(sequence.frames.length===sequence.frameCount&&[101,201].includes(sequence.frameCount),'Complete bounded key sequence');
+check(sequence.frames[0].progress===0&&sequence.frames.at(-1).progress===1&&sequence.frames[sequence.initialIndex].progress===.42,'Sequence covers the full mechanism and exact hero pose');
+let sequenceBytes=0;
+for(const [index,frame]of sequence.frames.entries()){
+  const safe=/^key-\d{3}\.webp$/.test(frame.file);check(safe,`Safe key frame ${index}`);if(!safe)continue;
+  const bytes=fs.readFileSync(path.join(sequenceRoot,frame.file)),size=webpSize(bytes);sequenceBytes+=bytes.length;
+  check(frame.index===index&&frame.progress>=0&&frame.progress<=1&&(!index||frame.progress>sequence.frames[index-1].progress),`Ordered key frame ${index}`);
+  check(hash(bytes)===frame.sha256&&bytes.length===frame.bytes,`Key frame integrity ${index}`);
+  check(size?.[0]===sequence.width&&size?.[1]===sequence.height&&frame.width===sequence.width&&frame.height===sequence.height,`Native key frame dimensions ${index}`);
+}
+check(sequenceBytes<=20*1024*1024,'Compressed key sequence stays within its delivery budget');
 check(hash(pdf)==='1e9c5a727407089a81f3761cc1530ab8eddbfad3993c7ba137d8e52020909f9d','Approved one-page PDF with verified portfolio link');
 check(fs.existsSync('.nojekyll'),'Buildless GitHub Pages deployment');
 check(!fs.existsSync('.openai'),'No former hosting configuration');
