@@ -1,14 +1,17 @@
 /**
  * A Blender-rendered input study. Native scrolling owns time and progress;
- * this controller fetches a small moving window and paints complete frames.
+ * compressed images warm ahead of scrolling; a bounded moving decode window
+ * paints complete frames without putting network round trips in the scroll path.
  * No decoder seek loop, WebGL context, wheel interception or animation loop.
  */
 const scenes=new WeakMap();
 const MANIFEST_URL=new URL('./shared/assets/product/key-sequence/manifest.json',import.meta.url);
 const MAX_CANVAS_PIXELS=1_500_000;
 const MAX_BITMAP_BYTES=48*1024*1024;
-const MAX_WORKING_BYTES=64*1024*1024;
+const MAX_ENCODED_BYTES=20*1024*1024;
+const MAX_WORKING_BYTES=96*1024*1024;
 const CONCURRENCY=2;
+const FETCH_CONCURRENCY=4;
 const MAX_FRAME_LAG=8;
 const TIERS=[640,960,1280,1600];
 const clamp=value=>Math.max(0,Math.min(1,Number.isFinite(value)?value:0));
@@ -24,11 +27,13 @@ export async function createSwitchScene(host,{signal}={}){
   try{context=canvas.getContext('2d',{alpha:true,desynchronized:true});}catch{}
   const reduced=matchMedia('(prefers-reduced-motion:reduce)');
   const manifestAbort=new AbortController();
-  const cache=new Map(),pending=new Map(),prefetched=new Set(),failures=new Map();
+  const cache=new Map(),pending=new Map(),encoded=new Map(),network=new Map(),failures=new Map();
+  const networkFailures=new Set();
+  const saveData=typeof navigator==='object'&&navigator.connection?.saveData===true;
   let manifest=null,resizeObserver=null,dead=false,visible=!document.hidden;
   let width=0,height=0,sizeDirty=true,bitmapBytes=0,clock=0,renderCount=0;
   let progress=.42,wanted=42,painted=-1,direction=-1,drawTier=640;
-  let lastDrawWidth=0,lastDrawHeight=0;
+  let lastDrawWidth=0,lastDrawHeight=0,encodedBytes=0,fetchCount=0,decodeCount=0,decodeTotal=0;
   const owned=()=>scenes.get(host)===api;
   const quiet=()=>document.documentElement.classList.contains('motion-off')||reduced.matches;
   const data=(key,value)=>{if(owned()&&host.dataset[key]!==value)host.dataset[key]=value;};
@@ -36,8 +41,14 @@ export async function createSwitchScene(host,{signal}={}){
     data('switchBitmapBytes',String(bitmapBytes));
     data('switchCacheCount',String(cache.size));
     data('switchInflight',String(pending.size));
+    data('switchFetches',String(network.size));
+    data('switchEncodedBytes',String(encodedBytes));
+    data('switchEncodedCount',String(encoded.size));
+    data('switchFetchCount',String(fetchCount));
+    data('switchDecodeMs',decodeCount?(decodeTotal/decodeCount).toFixed(2):'0');
   };
   const phase=value=>value<.25?'exploded':value<.42?'seat':value<.60?'press':value<.80?'signal':'settled';
+  const frameFor=(index,tier=drawTier)=>tier<=960&&manifest.compact?manifest.compact.frames[index]:manifest.frames[index];
   function canvasSize(){
     if(dead||!context||width<2||height<2)return false;
     if(!sizeDirty)return true;
@@ -57,7 +68,7 @@ export async function createSwitchScene(host,{signal}={}){
   // Reserve room for the canvas and two full source decodes as well as the
   // retained bitmaps. This is an owned-resource budget, not a browser RSS claim.
   function retainedLimit(){
-    const reserved=canvas.width*canvas.height*4+CONCURRENCY*(manifest?.width||1600)*(manifest?.height||1400)*4;
+    const reserved=MAX_ENCODED_BYTES+canvas.width*canvas.height*4+CONCURRENCY*(manifest?.width||1600)*(manifest?.height||1400)*4;
     return Math.max(12*1024*1024,Math.min(MAX_BITMAP_BYTES,MAX_WORKING_BYTES-reserved));
   }
   function drop(index){
@@ -114,7 +125,7 @@ export async function createSwitchScene(host,{signal}={}){
   }
   function cancelFarRequests(){
     for(const [index,job]of pending){
-      if(Math.abs(index-wanted)>MAX_FRAME_LAG){job.controller.abort();prefetched.delete(job.key);}
+      if(Math.abs(index-wanted)>MAX_FRAME_LAG)job.controller.abort();
     }
   }
   function fallback(reason){
@@ -123,21 +134,69 @@ export async function createSwitchScene(host,{signal}={}){
   }
   function candidates(){
     const list=[wanted];
-    for(const offset of[1,-1,2,3]){
-      const index=wanted+offset*direction;
-      if(index>=0&&index<manifest.frameCount&&!list.includes(index))list.push(index);
+    // Fit the entire decode window plus the displayed frame and two jobs.
+    // Previously an evicted neighbour was permanently marked "prefetched",
+    // so reversing a warm sequence still waited for an exact-target decode.
+    const bytes=drawTier*Math.round(drawTier*manifest.height/manifest.width)*4;
+    const count=Math.max(3,Math.min(24,Math.floor(retainedLimit()/bytes)-3));
+    for(let offset=1;list.length<count&&offset<manifest.frameCount;offset++){
+      for(const delta of[offset*direction,-offset*direction]){
+        const index=wanted+delta;
+        if(index>=0&&index<manifest.frameCount&&list.length<count)list.push(index);
+      }
     }
     return list;
   }
+  function fetchAhead(indices){
+    // The hero gets the first request. Only after it paints do background
+    // transfers begin; identical held poses share one compressed Blob.
+    const limit=painted<0?1:FETCH_CONCURRENCY;
+    const order=[...indices];
+    if(painted>=0&&!saveData){
+      for(let offset=1;offset<manifest.frameCount;offset++){
+        for(const index of[wanted+offset*direction,wanted-offset*direction]){
+          if(index>=0&&index<manifest.frameCount)order.push(index);
+        }
+      }
+    }
+    for(const index of order){
+      if(network.size>=limit)break;
+      const frame=frameFor(index),hash=frame.sha256;
+      if(encoded.has(hash)||network.has(hash)||networkFailures.has(hash))continue;
+      const controller=new AbortController();network.set(hash,controller);fetchCount++;
+      void fetchFrame(frame,controller);
+    }
+  }
+  async function fetchFrame(frame,controller){
+    try{
+      const url=new URL(frame.file,MANIFEST_URL);url.searchParams.set('v',frame.sha256.slice(0,12));
+      const response=await fetch(url,{signal:controller.signal,priority:painted<0?'high':'low'});
+      if(!response.ok)throw new Error('Frame unavailable');
+      const blob=await response.blob();
+      if(blob.size!==frame.bytes)throw new Error('Frame size differs from manifest');
+      if(dead||controller.signal.aborted)return;
+      if(encodedBytes+blob.size>MAX_ENCODED_BYTES)throw new Error('Encoded sequence budget exceeded');
+      encoded.set(frame.sha256,blob);encodedBytes+=blob.size;
+    }catch{
+      if(!dead&&!controller.signal.aborted){
+        networkFailures.add(frame.sha256);
+        if(painted<0)data('switchState','fallback');
+        data('switchFallback','frame-unavailable');
+      }
+    }finally{
+      if(network.get(frame.sha256)===controller)network.delete(frame.sha256);
+      if(!dead){diagnostics();pump();}
+    }
+  }
   function pump(){
     if(dead||!manifest||!visible||quiet()||!canvasSize())return;
-    for(const index of candidates()){
+    const indices=candidates();fetchAhead(indices);
+    for(const index of indices){
       if(pending.size>=CONCURRENCY)break;
-      const entry=cache.get(index),primary=index===wanted,key=`${index}:${drawTier}`;
+      const entry=cache.get(index),key=`${index}:${drawTier}`;
       if(entry&&entry.bitmap.width>=drawTier)continue;
-      if(pending.has(index)||(!primary&&prefetched.has(key)))continue;
+      if(pending.has(index)||!encoded.has(frameFor(index).sha256))continue;
       if(failures.has(key))continue;
-      if(!primary)prefetched.add(key);
       const controller=new AbortController(),job={controller,key,tier:drawTier};
       pending.set(index,job);diagnostics();
       void load(index,job);
@@ -146,15 +205,12 @@ export async function createSwitchScene(host,{signal}={}){
   async function load(index,job){
     let bitmap=null;
     try{
-      const frame=manifest.frames[index];
-      const url=new URL(frame.file,MANIFEST_URL);url.searchParams.set('v',frame.sha256.slice(0,12));
-      const response=await fetch(url,{signal:job.controller.signal});
-      if(!response.ok)throw new Error('Frame unavailable');
-      const blob=await response.blob();
-      if(blob.size!==frame.bytes)throw new Error('Frame size differs from manifest');
+      const sourceFrame=frameFor(index,job.tier),blob=encoded.get(sourceFrame.sha256);
       if(dead||job.controller.signal.aborted)return;
       const decodeHeight=Math.round(job.tier*manifest.height/manifest.width);
-      bitmap=await createImageBitmap(blob,{resizeWidth:job.tier,resizeHeight:decodeHeight,resizeQuality:'high'});
+      const started=performance.now();
+      bitmap=await createImageBitmap(blob,sourceFrame.width===job.tier?{}:{resizeWidth:job.tier,resizeHeight:decodeHeight,resizeQuality:'high'});
+      decodeTotal+=performance.now()-started;decodeCount++;
       if(dead||job.controller.signal.aborted){bitmap.close();bitmap=null;return;}
       if(bitmap.width!==job.tier||bitmap.height!==decodeHeight)throw new Error('Frame decoder dimensions unavailable');
       // Decode completion normally trails moving scroll progress. A complete
@@ -190,24 +246,26 @@ export async function createSwitchScene(host,{signal}={}){
       if(dead)return;
       progress=clamp(Number(value));
       const next=Math.round(progress*((manifest?.frameCount||101)-1));
-      if(next!==wanted){direction=Math.sign(next-wanted)||direction;wanted=next;failures.delete(`${wanted}:${drawTier}`);cancelFarRequests();}
+      if(next!==wanted){direction=Math.sign(next-wanted)||direction;wanted=next;failures.delete(`${wanted}:${drawTier}`);if(manifest)networkFailures.delete(frameFor(wanted).sha256);cancelFarRequests();}
       data('switchTargetProgress',progress.toFixed(4));
+      data('switchFrameLag',String(painted<0?0:Math.abs(wanted-painted)));
       if(visible&&!quiet()){present();pump();}
     },
     resize(){if(dead)return;sizeDirty=true;redraw();},
     dispose(){
       if(dead)return;dead=true;
       manifestAbort.abort();for(const job of pending.values())job.controller.abort();pending.clear();
+      for(const controller of network.values())controller.abort();network.clear();
       resizeObserver?.disconnect();
       document.removeEventListener('portfolio:motion',onMotion);
       document.removeEventListener('visibilitychange',onVisibility);
       reduced.removeEventListener('change',onReduced);
       signal?.removeEventListener('abort',onAbort);canvas.removeEventListener('contextlost',onContextLost);
       for(const index of [...cache.keys()])drop(index);
-      prefetched.clear();failures.clear();manifest=null;
+      encoded.clear();encodedBytes=0;networkFailures.clear();failures.clear();manifest=null;
       try{canvas.width=canvas.height=1;}catch{}
       canvas.remove();
-      if(owned()){scenes.delete(host);host.dataset.switchState='disposed';host.dataset.switchBitmapBytes='0';host.dataset.switchCacheCount='0';host.dataset.switchInflight='0';}
+      if(owned()){scenes.delete(host);host.dataset.switchState='disposed';host.dataset.switchBitmapBytes='0';host.dataset.switchCacheCount='0';host.dataset.switchInflight='0';host.dataset.switchEncodedBytes='0';host.dataset.switchEncodedCount='0';host.dataset.switchFetches='0';}
     }
   };
   function onAbort(){api.dispose();}
@@ -216,8 +274,8 @@ export async function createSwitchScene(host,{signal}={}){
   function onContextLost(event){event.preventDefault();fallback('canvas-unavailable');}
   function onVisibility(){
     visible=!document.hidden;
-    if(!visible){for(const job of pending.values()){job.controller.abort();prefetched.delete(job.key);}return;}
-    failures.clear();sizeDirty=true;redraw();
+    if(!visible){for(const job of pending.values())job.controller.abort();for(const controller of network.values())controller.abort();return;}
+    failures.clear();networkFailures.clear();sizeDirty=true;redraw();
   }
   scenes.set(host,api);
   data('switchState','loading');data('switchProgress',progress.toFixed(4));
@@ -242,6 +300,16 @@ export async function createSwitchScene(host,{signal}={}){
       const frame=source.frames[index];
       if(frame.index!==index||frame.file!==`key-${String(index).padStart(3,'0')}.webp`||frame.width!==source.width||frame.height!==source.height||typeof frame.progress!=='number'||!Number.isFinite(frame.progress)||Math.abs(frame.progress-index/(source.frameCount-1))>.000001||!Number.isInteger(frame.bytes)||frame.bytes<1||frame.bytes>4*1024*1024||!/^[a-f0-9]{64}$/.test(frame.sha256))throw new Error('Invalid sequence frame');
     }
+    if(source.compact){
+      const compact=source.compact;
+      if(compact.width!==960||compact.height!==840||!Array.isArray(compact.frames)||compact.frames.length!==source.frameCount)throw new Error('Invalid compact sequence');
+      for(let index=0;index<source.frameCount;index++){
+        const frame=compact.frames[index];
+        if(frame.index!==index||frame.file!==`key-${String(index).padStart(3,'0')}-960.webp`||frame.width!==960||frame.height!==840||frame.progress!==source.frames[index].progress||!Number.isInteger(frame.bytes)||frame.bytes<1||frame.bytes>4*1024*1024||!/^[a-f0-9]{64}$/.test(frame.sha256))throw new Error('Invalid compact frame');
+      }
+    }
+    const unique=new Map([...source.frames,...(source.compact?.frames||[])].map(frame=>[frame.sha256,frame.bytes]));
+    if([...unique.values()].reduce((sum,bytes)=>sum+bytes,0)>MAX_ENCODED_BYTES)throw new Error('Sequence exceeds preload budget');
     manifest=source;wanted=Math.round(progress*(source.frameCount-1));sizeDirty=true;
     data('switchState','prepared');redraw();
     return api;

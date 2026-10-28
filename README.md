@@ -32,6 +32,10 @@ This repository is the canonical hosting source for the portfolio.
 
 ## Reproducing the hardware study
 
+The scroll player warms compressed frames after the opening pose paints, deduplicates identical held poses, and decodes a bounded neighbourhood ahead of the requested frame. Network transfers and decoding have separate concurrency limits (four and two). The decoded cache stays at or below 48 MiB; compressed images have a 20 MiB cap. The conservative owned-resource model is 96 MiB, including source decode buffers and canvas, not a claim about total browser memory. Save-Data clients load only the nearby window; mobile and reduced-motion visitors keep the still.
+
+The 960px sequence is exported directly from the same original PNG poses with `node scripts/prepare-key-compact.mjs /path/sequence`. Medium displays decode these at their native size; larger displays retain the 1600px frames. This avoids resizing a full-resolution image during each scroll update. Run `npm test` for asset integrity and deterministic latency/lifecycle regression checks; the synthetic timing test is not a browser FPS measurement.
+
 Blender is optional authoring software; visitors and local previews need no Blender installation. Obtain these two inputs and pass their local paths explicitly:
 
 - [Cherry Keycaps Full.fbx](https://raw.githubusercontent.com/endeavoursc/cherry-mx-keycaps/3b94e3c7f8ed465917c1975ae0802d8965d5066b/Cherry%20Keycaps%20Full.fbx), pinned to [upstream commit 3b94e3c7](https://github.com/endeavoursc/cherry-mx-keycaps/commit/3b94e3c7f8ed465917c1975ae0802d8965d5066b). Copyright (c) 2020 Santiago Castelo, [MIT license](shared/assets/product/cherry-keycaps-MIT-LICENSE.txt); the complete notice accompanies the derived renders. The raw CAD is not bundled with this site. Source identity and hashes are recorded in [the CAD notice](shared/assets/product/cherry-keycaps-source.json).
