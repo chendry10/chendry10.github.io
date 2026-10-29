@@ -13,10 +13,9 @@ const MAX_WORKING_BYTES=112*1024*1024;
 const CONCURRENCY=2;
 const FETCH_CONCURRENCY=4;
 const MAX_FRAME_LAG=8;
-const TIERS=[640,960,1280,1600];
 const clamp=value=>Math.max(0,Math.min(1,Number.isFinite(value)?value:0));
 
-export async function createSwitchScene(host,{signal,study='processor'}={}){
+export async function createSwitchScene(host,{signal,study='processor',onFrameReady}={}){
   if(!['processor','trumpet','keystroke'].includes(study))throw new TypeError('Unknown authored study.');
   const sequenceURL=study==='trumpet'?new URL('./shared/assets/product/trumpet-sequence/manifest.json',import.meta.url):study==='keystroke'?new URL('./shared/assets/product/keystroke-sequence/manifest.json',import.meta.url):MANIFEST_URL;
   const dimensions=study==='trumpet'?[1920,1080,960,540]:study==='keystroke'?[1600,1400,960,840]:[1280,1120,960,840];
@@ -27,7 +26,7 @@ export async function createSwitchScene(host,{signal,study='processor'}={}){
   canvas.setAttribute('aria-hidden','true');canvas.setAttribute('role','presentation');
   host.append(canvas);
   let context=null;
-  try{context=canvas.getContext('2d',{alpha:true,desynchronized:true});}catch{}
+  try{context=canvas.getContext('2d',{alpha:false,desynchronized:true});}catch{}
   const reduced=matchMedia('(prefers-reduced-motion:reduce)');
   const manifestAbort=new AbortController();
   const cache=new Map(),pending=new Map(),encoded=new Map(),network=new Map(),failures=new Map();
@@ -51,7 +50,7 @@ export async function createSwitchScene(host,{signal,study='processor'}={}){
     data('switchDecodeMs',decodeCount?(decodeTotal/decodeCount).toFixed(2):'0');
   };
   const phase=value=>value<.1?'closed':value<.8?'opening':'expanded';
-  const frameFor=(index,tier=drawTier)=>tier<=960&&manifest.compact?manifest.compact.frames[index]:manifest.frames[index];
+  const frameFor=(index,tier=drawTier)=>([manifest.compact,manifest.balanced].find(level=>level&&level.width===tier)||manifest).frames[index];
   // Use physical scene progress so the player also supports denser sampling
   // where a future render needs it, without changing its scroll choreography.
   function nearestFrame(value){
@@ -73,7 +72,9 @@ export async function createSwitchScene(host,{signal,study='processor'}={}){
     context.imageSmoothingEnabled=true;context.imageSmoothingQuality='high';
     if(manifest){
       const fittedWidth=Math.max(w,h*manifest.width/manifest.height);
-      drawTier=Math.min(manifest.width,TIERS.find(tier=>tier>=fittedWidth)||manifest.width);
+      // Decode an authored tier directly. High-quality createImageBitmap
+      // resizing was doubling decode latency on the keyboard sequence.
+      drawTier=([manifest.compact,manifest.balanced,manifest].find(level=>level&&level.width>=fittedWidth)||manifest).width;
     }
     data('switchPixels',String(w*h));
     sizeDirty=false;
@@ -106,7 +107,6 @@ export async function createSwitchScene(host,{signal,study='processor'}={}){
     const scale=Math.max(canvas.width/entry.bitmap.width,canvas.height/entry.bitmap.height);
     const w=entry.bitmap.width*scale,h=entry.bitmap.height*scale;
     try{
-      context.clearRect(0,0,canvas.width,canvas.height);
       context.drawImage(entry.bitmap,(canvas.width-w)/2,(canvas.height-h)/2,w,h);
     }catch{fallback('canvas-unavailable');return false;}
     entry.used=++clock;entry.painted=true;painted=index;
@@ -154,7 +154,7 @@ export async function createSwitchScene(host,{signal,study='processor'}={}){
     const bytes=drawTier*Math.round(drawTier*manifest.height/manifest.width)*4;
     const count=Math.max(3,Math.min(24,Math.floor(retainedLimit()/bytes)-3));
     for(let offset=1;list.length<count&&offset<manifest.frameCount;offset++){
-      for(const delta of[offset*direction,-offset*direction]){
+      for(const delta of[offset*direction,...(offset%2===0?[-offset/2*direction]:[])]){
         const index=wanted+delta;
         if(index>=0&&index<manifest.frameCount&&list.length<count)list.push(index);
       }
@@ -232,7 +232,11 @@ export async function createSwitchScene(host,{signal,study='processor'}={}){
       drop(index);
       const entry={bitmap,bytes:bitmap.width*bitmap.height*4,used:++clock,painted:false};
       cache.set(index,entry);bitmapBytes+=entry.bytes;bitmap=null;
-      present();trim();
+      // The page already owns requestAnimationFrame. Decode completion only
+      // asks that owner for a paint; it never paints between display frames.
+      if(onFrameReady){if(painted!==wanted||index===painted)onFrameReady();}
+      else present();
+      trim();
     }catch(error){
       bitmap?.close();
       if(!dead&&!job.controller.signal.aborted){
@@ -263,7 +267,7 @@ export async function createSwitchScene(host,{signal,study='processor'}={}){
       if(next!==wanted){direction=Math.sign(next-wanted)||direction;wanted=next;failures.delete(`${wanted}:${drawTier}`);if(manifest)networkFailures.delete(frameFor(wanted).sha256);cancelFarRequests();}
       data('switchTargetProgress',progress.toFixed(4));
       data('switchFrameLag',String(painted<0?0:Math.abs(wanted-painted)));
-      if(visible&&!quiet()){present();pump();}
+      if(visible&&!quiet()&&(painted!==wanted||!cache.get(wanted)?.painted||sizeDirty)){present();pump();}
     },
     resize(){if(dead)return;sizeDirty=true;redraw();},
     dispose(){
@@ -314,15 +318,16 @@ export async function createSwitchScene(host,{signal,study='processor'}={}){
       const frame=source.frames[index];
       if(frame.index!==index||frame.file!==`key-${String(index).padStart(3,'0')}.webp`||frame.width!==source.width||frame.height!==source.height||typeof frame.progress!=='number'||!Number.isFinite(frame.progress)||frame.progress<0||frame.progress>1||(index&&frame.progress<=source.frames[index-1].progress)||!Number.isInteger(frame.bytes)||frame.bytes<1||frame.bytes>4*1024*1024||!/^[a-f0-9]{64}$/.test(frame.sha256))throw new Error('Invalid sequence frame');
     }
-    if(source.compact){
-      const compact=source.compact;
-      if(compact.width!==dimensions[2]||compact.height!==dimensions[3]||!Array.isArray(compact.frames)||compact.frames.length!==source.frameCount)throw new Error('Invalid compact sequence');
+    for(const [name,tierWidth,tierHeight,suffix] of [['compact',dimensions[2],dimensions[3],'-960'],['balanced',1280,1120,'-1280']]){
+      const tier=source[name];if(!tier)continue;
+      if(name==='balanced'&&study!=='keystroke')throw new Error('Unexpected balanced tier');
+      if(tier.width!==tierWidth||tier.height!==tierHeight||!Array.isArray(tier.frames)||tier.frames.length!==source.frameCount)throw new Error('Invalid responsive sequence');
       for(let index=0;index<source.frameCount;index++){
-        const frame=compact.frames[index];
-        if(frame.index!==index||frame.file!==`key-${String(index).padStart(3,'0')}-960.webp`||frame.width!==dimensions[2]||frame.height!==dimensions[3]||frame.progress!==source.frames[index].progress||!Number.isInteger(frame.bytes)||frame.bytes<1||frame.bytes>4*1024*1024||!/^[a-f0-9]{64}$/.test(frame.sha256))throw new Error('Invalid compact frame');
+        const frame=tier.frames[index];
+        if(frame.index!==index||frame.file!==`key-${String(index).padStart(3,'0')}${suffix}.webp`||frame.width!==tierWidth||frame.height!==tierHeight||frame.progress!==source.frames[index].progress||!Number.isInteger(frame.bytes)||frame.bytes<1||frame.bytes>4*1024*1024||!/^[a-f0-9]{64}$/.test(frame.sha256))throw new Error('Invalid responsive frame');
       }
     }
-    const unique=new Map([...source.frames,...(source.compact?.frames||[])].map(frame=>[frame.sha256,frame.bytes]));
+    const unique=new Map([...source.frames,...(source.compact?.frames||[]),...(source.balanced?.frames||[])].map(frame=>[frame.sha256,frame.bytes]));
     if([...unique.values()].reduce((sum,bytes)=>sum+bytes,0)>MAX_ENCODED_BYTES)throw new Error('Sequence exceeds preload budget');
     manifest=source;wanted=nearestFrame(progress);sizeDirty=true;
     data('switchState','prepared');redraw();

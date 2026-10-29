@@ -65,7 +65,7 @@ function releaseKey(){
 function warmKey(){
   if(still||hidden||key||keyLoading)return;
   keyLoading=true;const ticket=++keyTicket;keyAbort=new AbortController();const signal=keyAbort.signal;
-  import('./switch-scene.js?v=b63883f50615').then(({createSwitchScene})=>createSwitchScene(keyHost,{signal,study:'keystroke'})).then(controller=>{
+  import('./switch-scene.js?v=4c25f4832e0f').then(({createSwitchScene})=>createSwitchScene(keyHost,{signal,study:'keystroke',onFrameReady:schedule})).then(controller=>{
     if(signal.aborted||ticket!==keyTicket||quiet()){controller.dispose();return;}
     key=controller;keyLoading=false;controller.setProgress(keyLatest);schedule();
   }).catch(()=>{if(ticket===keyTicket){keyLoading=false;data(keyHost,'switchState','fallback');}});
@@ -74,7 +74,7 @@ function releaseTrumpet(){trumpetTicket++;trumpetAbort?.abort();trumpetAbort=nul
 function warmTrumpet(){
   if(still||hidden||trumpet||trumpetLoading)return;
   trumpetLoading=true;const ticket=++trumpetTicket;trumpetAbort=new AbortController();const signal=trumpetAbort.signal;
-  import('./switch-scene.js?v=b63883f50615').then(({createSwitchScene})=>createSwitchScene(trumpetHost,{signal,study:'trumpet'})).then(controller=>{
+  import('./switch-scene.js?v=4c25f4832e0f').then(({createSwitchScene})=>createSwitchScene(trumpetHost,{signal,study:'trumpet',onFrameReady:schedule})).then(controller=>{
     if(signal.aborted||ticket!==trumpetTicket||quiet()){controller.dispose();return;}
     trumpet=controller;trumpetLoading=false;controller.setProgress(poses?.music||0);schedule();
   }).catch(()=>{if(ticket===trumpetTicket){trumpetLoading=false;data(trumpetHost,'switchState','fallback');}});

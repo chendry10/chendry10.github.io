@@ -14,9 +14,9 @@ assert.ok(Math.abs(inputPose(.35)-.5)<1e-9,'Input story uses the full scroll int
 assert.equal(inputPose(.84),1,'Input story holds its final pose through the handoff');
 for(const p of[.05,.65])assert.ok(Math.abs(inputPose(p-1e-8)-inputPose(p+1e-8))<.00001,'Pose mapping remains continuous');
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
-async function fixture({code=source,latency=70,decodeLatency=25,width=760,height=665,viewportWidth=1280,dpr=1,change,saveData=false,failFirst=false,study='processor'}={}){
+async function fixture({code=source,latency=70,decodeLatency=25,width=760,height=665,viewportWidth=1280,dpr=1,change,saveData=false,failFirst=false,study='processor',onFrameReady}={}){
   let now=0,fetches=0,decoders=0,maxFetches=0,maxDecoders=0,cancelled=0;
-  const events=[],requests=[],bitmaps=[],draws=[],samples=[];
+  const events=[],requests=[],bitmaps=[],draws=[],samples=[],decodeOptions=[];
   const later=(delay,run)=>events.push({at:now+delay,run});
   class Element extends EventTarget{
     constructor(){super();this.dataset={};this.children=[];}
@@ -39,8 +39,8 @@ async function fixture({code=source,latency=70,decodeLatency=25,width=760,height
   class ResizeObserver{constructor(fn){this.fn=fn;observer=this;}observe(){this.fn([{contentRect:{width,height}}]);}disconnect(){}}
   const fetch=async(url,{signal}={})=>{
     if(url.pathname.endsWith('manifest.json'))return{ok:true,json:async()=>manifest};
-    const index=Number(url.pathname.match(/key-(\d+)(?:-960)?\.webp$/)[1]);
-    const frame=url.pathname.includes('-960.webp')?manifest.compact.frames[index]:manifest.frames[index];
+    const index=Number(url.pathname.match(/key-(\d+)(?:-960|-1280)?\.webp$/)[1]);
+    const frame=url.pathname.includes('-1280.webp')?manifest.balanced.frames[index]:url.pathname.includes('-960.webp')?manifest.compact.frames[index]:manifest.frames[index];
     requests.push({index,time:now,file:url.pathname});fetches++;maxFetches=Math.max(maxFetches,fetches);
     return new Promise((resolve,reject)=>{
       let done=false;
@@ -51,20 +51,20 @@ async function fixture({code=source,latency=70,decodeLatency=25,width=760,height
     });
   };
   const createImageBitmap=(blob,options)=>new Promise(resolve=>{
-    decoders++;maxDecoders=Math.max(maxDecoders,decoders);
+    decodeOptions.push(options);decoders++;maxDecoders=Math.max(maxDecoders,decoders);
     later(decodeLatency,()=>{decoders--;const bitmap={index:blob.index,width:options.resizeWidth||blob.width,height:options.resizeHeight||blob.height,closed:false,close(){this.closed=true;}};bitmaps.push(bitmap);resolve(bitmap);});
   });
   const scope=vm.createContext({Element,document:doc,matchMedia:()=>reduced,ResizeObserver,fetch,createImageBitmap,AbortController,URL,innerWidth:viewportWidth,devicePixelRatio:dpr,performance:{now:()=>now},navigator:{connection:{saveData}},console});
   const module=new vm.SourceTextModule(code,{context:scope,initializeImportMeta(meta){meta.url=pathToFileURL(process.cwd()+'/switch-scene.js').href;}});
   await module.link(()=>{throw Error('Unexpected import');});await module.evaluate();
-  const host=new Element(),abort=new AbortController(),api=await module.namespace.createSwitchScene(host,{signal:abort.signal,study});await flush();
+  const host=new Element(),abort=new AbortController(),api=await module.namespace.createSwitchScene(host,{signal:abort.signal,study,onFrameReady});await flush();
   async function advance(ms){
     const end=now+ms;let count=0;
     while(true){events.sort((a,b)=>a.at-b.at);if(!events.length||events[0].at>end)break;if(++count>100000)throw Error('Runaway decode queue');const event=events.shift();now=event.at;event.run();await flush();}
     now=end;await flush();
   }
   async function move(index){api.setProgress(index/(manifest.frameCount-1));await advance(1000/60);samples.push({target:index,shown:Number(host.dataset.switchFrame),time:now});}
-  return{host,api,abort,doc,reduced,requests,bitmaps,draws,samples,advance,move,resize(w,h){width=w;height=h;observer.observe();},stats:()=>({now,fetches,decoders,maxFetches,maxDecoders,cancelled})};
+  return{host,api,abort,doc,reduced,requests,bitmaps,draws,samples,decodeOptions,advance,move,resize(w,h){width=w;height=h;observer.observe();},stats:()=>({now,fetches,decoders,maxFetches,maxDecoders,cancelled})};
 }
 
 async function benchmark(code){
@@ -163,3 +163,51 @@ for(const index of [0,40,100,20,120,0]){await phone.move(index);await phone.adva
 assert.ok(phone.requests.every(r=>r.file.endsWith('-960.webp')),'High-DPR phone downloads compact frames');
 assert.ok(phone.bitmaps.every(b=>b.width<=960),'Phone decodes within the compact tier');
 phone.api.dispose();await phone.advance(300);assert.ok(phone.bitmaps.every(b=>b.closed));
+
+let notifications=0;
+const coordinated=await fixture({onFrameReady:()=>notifications++});
+await coordinated.advance(5000);
+assert.ok(notifications>0,'Decoded frames wake the page frame owner');
+assert.equal(coordinated.draws.length,0,'Decode completion never paints outside the page frame');
+coordinated.api.setProgress(0);await coordinated.advance(5000);
+assert.equal(coordinated.draws.at(-1).index,0);
+const paints=coordinated.draws.length;
+coordinated.api.setProgress(.8);await coordinated.advance(500);
+assert.equal(coordinated.draws.length,paints,'Async completion waits for display frame');
+coordinated.api.setProgress(.8);assert.equal(coordinated.draws.at(-1).index,96);
+assert.ok(coordinated.decodeOptions.every(o=>!o.resizeWidth&&!o.resizeHeight),'Authored native tiers avoid per-frame bitmap resampling');
+const stable=coordinated.bitmaps.length;
+for(let i=0;i<100;i++)coordinated.api.setProgress(.8);
+await coordinated.advance(1000);assert.equal(coordinated.bitmaps.length,stable,'Unchanged pose does not restart decode work');
+coordinated.api.dispose();const closedNotifications=notifications;await coordinated.advance(500);
+assert.equal(notifications,closedNotifications);assert.ok(coordinated.bitmaps.every(b=>b.closed));
+console.log('Native decode tiers and page-owned frame presentation passed.');
+
+let resizeSignals=0;
+const ownerResize=await fixture({width:760,height:665,onFrameReady:()=>resizeSignals++,change:m=>{m.compact={width:960,height:840,frames:m.frames.map(f=>({...f,width:960,height:840,file:f.file.replace('.webp','-960.webp'),bytes:20000,sha256:'c'+f.sha256.slice(1)}))};}});
+await ownerResize.advance(5000);ownerResize.api.setProgress(0);await ownerResize.advance(5000);
+ownerResize.resize(1800,1575);await ownerResize.advance(5000);
+const oldPaints=ownerResize.draws.length;ownerResize.api.setProgress(0);
+assert.equal(ownerResize.draws.length,oldPaints+1,'Same-pose sharp replacement paints on the owner frame');
+assert.ok(ownerResize.bitmaps.some(b=>!b.closed&&b.index===0&&b.width===1280));ownerResize.api.dispose();
+const balanced=await fixture({study:'keystroke',width:1100,height:962,change:m=>{
+ m.width=1600;m.height=1400;m.frames=m.frames.map(f=>({...f,width:1600,height:1400}));
+ m.balanced={width:1280,height:1120,frames:m.frames.map(f=>({...f,width:1280,height:1120,file:f.file.replace('.webp','-1280.webp'),bytes:30000,sha256:'b'+f.sha256.slice(1)}))};
+}});
+await balanced.advance(5000);assert.ok(balanced.requests.every(r=>!r.file.includes('-1280')),'Full-size display preserves original source');
+balanced.resize(800,700);await balanced.advance(5000);assert.ok(balanced.requests.some(r=>r.file.endsWith('-1280.webp')),'Intermediate display uses pre-sized desktop tier');
+assert.ok(balanced.decodeOptions.every(o=>!o.resizeWidth));balanced.api.dispose();
+const invalidBalanced=await fixture({change:m=>{m.balanced={width:1280,height:1120,frames:m.frames};}});
+assert.equal(invalidBalanced.host.dataset.switchState,'fallback','Unexpected delivery tiers fail closed');
+
+let ownerPending=false;
+const movingOwner=await fixture({onFrameReady:()=>{ownerPending=true;}});
+await movingOwner.advance(4500);movingOwner.api.setProgress(0);await movingOwner.advance(4500);
+const ownerLags=[];
+for(const index of [...Array.from({length:121},(_,i)=>i),...Array.from({length:120},(_,i)=>119-i)]){
+ movingOwner.api.setProgress(index/120);ownerPending=false;await movingOwner.advance(1000/60);
+ if(ownerPending)movingOwner.api.setProgress(index/120);
+ ownerLags.push(Math.abs(index-Number(movingOwner.host.dataset.switchFrame)));
+}
+ownerLags.sort((a,b)=>a-b);assert.ok(ownerLags[Math.floor(ownerLags.length*.95)]<=1,'Page-owned continuous forward/reverse traversal stays within one pose');
+movingOwner.api.dispose();await movingOwner.advance(300);assert.ok(movingOwner.bitmaps.every(b=>b.closed));
