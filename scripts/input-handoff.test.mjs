@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {SCREEN_QUAD,screenHandoffMatrix} from '../input-handoff.js';
 assert.deepEqual(SCREEN_QUAD,JSON.parse(fs.readFileSync(new URL('../shared/assets/product/keystroke-sequence/projection.json',import.meta.url))).screenQuad);
-for(const [width,height] of [[1280,720],[1024,900],[1920,1080]]){
+for(const [width,height] of [[390,844],[375,667],[820,1180],[844,390],[1280,720],[1024,900],[1920,1080]]){
  const w=Math.min(width*.9,Math.min(height*.72,Math.max(160,height-240))*32/27,1200),h=w*1326/2560;
  const box={x:width*.44,y:height*.14,w:width*.5,h:width*.5*7/8};
  const args={keyBox:box,productWidth:w,viewportWidth:width,viewportHeight:height};

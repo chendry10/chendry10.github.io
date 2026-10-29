@@ -14,7 +14,7 @@ assert.ok(Math.abs(inputPose(.35)-.5)<1e-9,'Input story uses the full scroll int
 assert.equal(inputPose(.84),1,'Input story holds its final pose through the handoff');
 for(const p of[.05,.65])assert.ok(Math.abs(inputPose(p-1e-8)-inputPose(p+1e-8))<.00001,'Pose mapping remains continuous');
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
-async function fixture({code=source,latency=70,decodeLatency=25,width=760,height=665,change,saveData=false,failFirst=false,study='processor'}={}){
+async function fixture({code=source,latency=70,decodeLatency=25,width=760,height=665,viewportWidth=1280,dpr=1,change,saveData=false,failFirst=false,study='processor'}={}){
   let now=0,fetches=0,decoders=0,maxFetches=0,maxDecoders=0,cancelled=0;
   const events=[],requests=[],bitmaps=[],draws=[],samples=[];
   const later=(delay,run)=>events.push({at:now+delay,run});
@@ -41,7 +41,7 @@ async function fixture({code=source,latency=70,decodeLatency=25,width=760,height
     if(url.pathname.endsWith('manifest.json'))return{ok:true,json:async()=>manifest};
     const index=Number(url.pathname.match(/key-(\d+)(?:-960)?\.webp$/)[1]);
     const frame=url.pathname.includes('-960.webp')?manifest.compact.frames[index]:manifest.frames[index];
-    requests.push({index,time:now});fetches++;maxFetches=Math.max(maxFetches,fetches);
+    requests.push({index,time:now,file:url.pathname});fetches++;maxFetches=Math.max(maxFetches,fetches);
     return new Promise((resolve,reject)=>{
       let done=false;
       const abort=()=>{if(done)return;done=true;fetches--;cancelled++;reject(new Error('aborted'));};
@@ -54,7 +54,7 @@ async function fixture({code=source,latency=70,decodeLatency=25,width=760,height
     decoders++;maxDecoders=Math.max(maxDecoders,decoders);
     later(decodeLatency,()=>{decoders--;const bitmap={index:blob.index,width:options.resizeWidth||blob.width,height:options.resizeHeight||blob.height,closed:false,close(){this.closed=true;}};bitmaps.push(bitmap);resolve(bitmap);});
   });
-  const scope=vm.createContext({Element,document:doc,matchMedia:()=>reduced,ResizeObserver,fetch,createImageBitmap,AbortController,URL,devicePixelRatio:1,performance:{now:()=>now},navigator:{connection:{saveData}},console});
+  const scope=vm.createContext({Element,document:doc,matchMedia:()=>reduced,ResizeObserver,fetch,createImageBitmap,AbortController,URL,innerWidth:viewportWidth,devicePixelRatio:dpr,performance:{now:()=>now},navigator:{connection:{saveData}},console});
   const module=new vm.SourceTextModule(code,{context:scope,initializeImportMeta(meta){meta.url=pathToFileURL(process.cwd()+'/switch-scene.js').href;}});
   await module.link(()=>{throw Error('Unexpected import');});await module.evaluate();
   const host=new Element(),abort=new AbortController(),api=await module.namespace.createSwitchScene(host,{signal:abort.signal,study});await flush();
@@ -156,3 +156,10 @@ console.log(JSON.stringify(report,null,2));
 const typingScene=await fixture({study:'keystroke',change:m=>{m.width=1600;m.height=1400;m.frameCount=181;m.frames=Array.from({length:181},(_,index)=>({index,file:`key-${String(index).padStart(3,'0')}.webp`,progress:index/180,width:1600,height:1400,bytes:65000,sha256:index.toString(16).padStart(64,'0')}));}});
 await typingScene.advance(5000);for(const index of [0,50,150,25,180]){await typingScene.move(index);await typingScene.advance(400);assert.equal(typingScene.draws.at(-1).index,index);}
 assert.ok(Number(typingScene.host.dataset.switchBitmapBytes)<=48*1024*1024);typingScene.api.dispose();await typingScene.advance(500);assert.ok(typingScene.bitmaps.every(b=>b.closed));
+
+const phone=await fixture({viewportWidth:390,dpr:3,width:390,height:341,change:m=>{m.compact={width:960,height:840,frames:m.frames.map(f=>({...f,width:960,height:840,file:f.file.replace('.webp','-960.webp'),bytes:20000,sha256:'c'+f.sha256.slice(1)}))};}});
+await phone.advance(5000);
+for(const index of [0,40,100,20,120,0]){await phone.move(index);await phone.advance(400);assert.equal(phone.draws.at(-1).index,index);assert.ok(Number(phone.host.dataset.switchBitmapBytes)<=24*1024*1024,'Phone decoded frames stay within 24 MiB');}
+assert.ok(phone.requests.every(r=>r.file.endsWith('-960.webp')),'High-DPR phone downloads compact frames');
+assert.ok(phone.bitmaps.every(b=>b.width<=960),'Phone decodes within the compact tier');
+phone.api.dispose();await phone.advance(300);assert.ok(phone.bitmaps.every(b=>b.closed));

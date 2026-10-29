@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {scrollViewportHeight,scrollLayoutChanged} from '../scroll-viewport.js';
+const before={width:390,height:scrollViewportHeight(390,700,700)};
+const toolbarHidden={width:390,height:scrollViewportHeight(390,780,700)};
+assert.equal(scrollLayoutChanged(before,toolbarHidden),false,'Browser toolbar cannot reset progress');
+assert.equal(scrollLayoutChanged(before,{width:844,height:390}),true,'Rotation remeasures');
+assert.equal(scrollLayoutChanged(before,{width:390,height:800}),true,'Real stage resize remeasures');
+assert.equal(scrollViewportHeight(390,780,700,false),780,'Reduced motion keeps native viewport');
+assert.equal(scrollViewportHeight(1024,900,700),900,'Desktop uses live viewport');
+assert.equal(scrollViewportHeight(390,780,0),780,'Unavailable stage has safe fallback');
+console.log('Stable mobile viewport, rotation and reduced-motion checks passed.');

@@ -65,7 +65,8 @@ export async function createSwitchScene(host,{signal,study='processor'}={}){
     if(dead||!context||width<2||height<2)return false;
     if(!sizeDirty)return true;
     // The enlarged keyboard opening needs enough pixels for its 1.25x intro pose.
-    const ratio=study==='keystroke'?1.5:Math.min(devicePixelRatio||1,1.5);
+    const small=typeof innerWidth==='number'&&innerWidth<=900;
+    const ratio=small?Math.min(devicePixelRatio||1,1.5):study==='keystroke'?1.5:Math.min(devicePixelRatio||1,1.5);
     const scale=Math.min(1,Math.sqrt(MAX_CANVAS_PIXELS/(width*height*ratio*ratio)));
     const w=Math.max(1,Math.floor(width*ratio*scale)),h=Math.max(1,Math.floor(height*ratio*scale));
     if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
@@ -82,7 +83,7 @@ export async function createSwitchScene(host,{signal,study='processor'}={}){
   // retained bitmaps. This is an owned-resource budget, not a browser RSS claim.
   function retainedLimit(){
     const reserved=MAX_ENCODED_BYTES+canvas.width*canvas.height*4+CONCURRENCY*(manifest?.width||1600)*(manifest?.height||1400)*4;
-    return Math.max(12*1024*1024,Math.min(MAX_BITMAP_BYTES,MAX_WORKING_BYTES-reserved));
+    return Math.max(12*1024*1024,Math.min(typeof innerWidth==='number'&&innerWidth<=900?24*1024*1024:MAX_BITMAP_BYTES,MAX_WORKING_BYTES-reserved));
   }
   function drop(index){
     const entry=cache.get(index);if(!entry)return;
