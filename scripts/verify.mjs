@@ -162,6 +162,7 @@ check(inputManifest.frameCount===181&&inputManifest.initialIndex===0,'Full keyst
 check(hash(fs.readFileSync(path.join(root,inputNotice.source),'utf8').replaceAll('\r\n','\n'))===inputNotice.sourceSHA256,'Keystroke renderer provenance');
 check(hash(fs.readFileSync(path.join(inputRoot,'manifest.json')))===inputNotice.manifestSHA256,'Keystroke manifest provenance');
 check(hash(fs.readFileSync(path.join(root,inputNotice.deliveryTier.source),'utf8').replaceAll('\r\n','\n'))===inputNotice.deliveryTier.sourceSHA256,'Delivery tier generation provenance');
+for(const [file,digest]of [[inputNotice.monitorProjection.source,inputNotice.monitorProjection.sourceSHA256],[inputNotice.monitorProjection.coordinates,inputNotice.monitorProjection.coordinatesSHA256]])check(hash(fs.readFileSync(path.join(root,file),'utf8').replaceAll('\r\n','\n'))===digest,'Monitor projection provenance');
 let inputBytes=0;
 for(const [tier,w,h,suffix]of [[inputManifest,1600,1400,''],[inputManifest.compact,960,840,'-960'],[inputManifest.balanced,1280,1120,'-1280']]){
  check(tier.width===w&&tier.height===h&&tier.frames.length===181,'Keystroke responsive tier');
@@ -191,8 +192,9 @@ check(trumpet.frameCount===121&&trumpet.frames.length===121&&trumpet.compact.fra
 check(trumpetNotice.model.license==='CC BY 4.0'&&html.includes('Trumpet model by Pakaku')&&html.includes(trumpetNotice.model.licenseURL),'Visible original model attribution and license');
 check(hash(fs.readFileSync(path.join(root,trumpetNotice.source),'utf8').replaceAll('\r\n','\n'))===trumpetNotice.sourceSHA256,'Trumpet renderer provenance');
 check(hash(fs.readFileSync(path.join(trumpetRoot,'manifest.json')))===trumpetNotice.manifestSHA256,'Trumpet manifest provenance');
+check(hash(fs.readFileSync(path.join(root,trumpetNotice.deliveryTier.source),'utf8').replaceAll('\r\n','\n'))===trumpetNotice.deliveryTier.sourceSHA256,'Trumpet tier provenance');
 let trumpetBytes=0;
-for(const [frames,width,height,suffix] of [[trumpet.frames,1920,1080,''],[trumpet.compact.frames,960,540,'-960']]){
+for(const [frames,width,height,suffix] of [[trumpet.frames,1920,1080,''],[trumpet.compact.frames,960,540,'-960'],[trumpet.balanced.frames,1600,900,'-1600']]){
   for(const [index,asset] of frames.entries()){
     const bytes=fs.readFileSync(path.join(trumpetRoot,asset.file));trumpetBytes+=bytes.length;
     check(asset.file===`key-${String(index).padStart(3,'0')}${suffix}.webp`&&asset.index===index&&asset.progress===index/120,'Ordered trumpet frames');

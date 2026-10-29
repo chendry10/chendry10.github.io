@@ -144,7 +144,7 @@ export async function createSwitchScene(host,{signal,study='processor',onFrameRe
   }
   function fallback(reason){
     const wasOwned=owned();api.dispose();
-    if(wasOwned&&!scenes.has(host)&&!signal?.aborted){host.dataset.switchState='fallback';host.dataset.switchFallback=reason;}
+    if(wasOwned&&!scenes.has(host)&&!signal?.aborted){host.dataset.switchState='fallback';host.dataset.switchFallback=reason;onFrameReady?.();}
   }
   function candidates(){
     const list=[wanted];
@@ -164,9 +164,10 @@ export async function createSwitchScene(host,{signal,study='processor',onFrameRe
   function fetchAhead(indices){
     // The hero gets the first request. Only after it paints do background
     // transfers begin; identical held poses share one compressed Blob.
-    const limit=painted<0?1:FETCH_CONCURRENCY;
+    const prepared=painted>=0||cache.has(wanted);
+    const limit=prepared?FETCH_CONCURRENCY:1;
     const order=[...indices];
-    if(painted>=0&&!saveData){
+    if(prepared&&!saveData){
       for(let offset=1;offset<manifest.frameCount;offset++){
         for(const index of[wanted+offset*direction,wanted-offset*direction]){
           if(index>=0&&index<manifest.frameCount)order.push(index);
@@ -260,6 +261,7 @@ export async function createSwitchScene(host,{signal,study='processor',onFrameRe
     trim();pump();
   }
   const api={
+    getFrame(){return dead?-1:painted;},
     setProgress(value){
       if(dead)return;
       progress=clamp(Number(value));
@@ -318,9 +320,9 @@ export async function createSwitchScene(host,{signal,study='processor',onFrameRe
       const frame=source.frames[index];
       if(frame.index!==index||frame.file!==`key-${String(index).padStart(3,'0')}.webp`||frame.width!==source.width||frame.height!==source.height||typeof frame.progress!=='number'||!Number.isFinite(frame.progress)||frame.progress<0||frame.progress>1||(index&&frame.progress<=source.frames[index-1].progress)||!Number.isInteger(frame.bytes)||frame.bytes<1||frame.bytes>4*1024*1024||!/^[a-f0-9]{64}$/.test(frame.sha256))throw new Error('Invalid sequence frame');
     }
-    for(const [name,tierWidth,tierHeight,suffix] of [['compact',dimensions[2],dimensions[3],'-960'],['balanced',1280,1120,'-1280']]){
+    for(const [name,tierWidth,tierHeight,suffix] of [['compact',dimensions[2],dimensions[3],'-960'],['balanced',study==='trumpet'?1600:1280,study==='trumpet'?900:1120,study==='trumpet'?'-1600':'-1280']]){
       const tier=source[name];if(!tier)continue;
-      if(name==='balanced'&&study!=='keystroke')throw new Error('Unexpected balanced tier');
+      if(name==='balanced'&&!['keystroke','trumpet'].includes(study))throw new Error('Unexpected balanced tier');
       if(tier.width!==tierWidth||tier.height!==tierHeight||!Array.isArray(tier.frames)||tier.frames.length!==source.frameCount)throw new Error('Invalid responsive sequence');
       for(let index=0;index<source.frameCount;index++){
         const frame=tier.frames[index];

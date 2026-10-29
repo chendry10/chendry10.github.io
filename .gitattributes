@@ -2,3 +2,4 @@ shared/assets/product/cherry-keycaps-MIT-LICENSE.txt text eol=lf
 
 # The provenance digest covers exact manifest bytes on every platform.
 shared/assets/product/keystroke-sequence/manifest.json text eol=lf
+shared/assets/product/trumpet-sequence/manifest.json text eol=lf

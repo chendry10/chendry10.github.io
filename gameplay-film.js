@@ -1,5 +1,5 @@
 /** A genuine local gameplay recording. No decoder/seek loop or game logic. */
-export function createGameplayFilm(video, button,{startTime=0}={}){
+export function createGameplayFilm(video, button,{startTime=0,resetOnDeactivate=true}={}){
   let dead=false,active=false,inView=false,loaded=false,userPaused=false,playTicket=0,ready=false,positioned=startTime<=0;
   const reduced=matchMedia('(prefers-reduced-motion:reduce)');
   const quiet=()=>document.documentElement.classList.contains('motion-off')||reduced.matches;
@@ -8,6 +8,7 @@ export function createGameplayFilm(video, button,{startTime=0}={}){
     if(dead||loaded||quiet())return;
     loaded=true;
     video.src=innerWidth<=1100?video.dataset.sourceSmall:video.dataset.source;
+    video.playbackRate=1;
     video.load();
   }
   function pause(){playTicket++;video.pause();video.dataset.filmState=loaded?'paused':'poster';}
@@ -38,11 +39,12 @@ export function createGameplayFilm(video, button,{startTime=0}={}){
   video.dataset.filmState='poster';label();
   return {
     prepare,
+    refresh:sync,
     setActive(value){
       const next=Boolean(value);if(next===active)return;active=next;
       // Reversing into the rendered monitor returns to its exact source frame.
       // Seek only at this boundary; the matching poster covers decoder latency.
-      if(!next&&loaded&&positioned&&startTime>0&&video.readyState>=1){
+      if(resetOnDeactivate&&!next&&loaded&&positioned&&startTime>0&&video.readyState>=1){
         ready=false;delete video.dataset.filmReady;
         video.currentTime=Math.min(startTime,Math.max(0,video.duration-.05));
       }

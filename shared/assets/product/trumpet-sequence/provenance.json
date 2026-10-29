@@ -18,7 +18,7 @@
   },
   "source": "scripts/render-silver-trumpet.py",
   "sourceSHA256": "1c0d7af7072bacf86ab78240e9efa18f1f66dbc8857fc52bea810607d5560da7",
-  "manifestSHA256": "32b882efb6f872965ad4a49da816613329f821c875f33225d0b06c66b2ea7929",
+  "manifestSHA256": "9a99f55f2c22e959b7498f625f62cee2fdd85732d7d0330ff338d496382b8300",
   "render": {
     "engine": "Blender 4.5 Cycles / OPTIX",
     "samples": 192,
@@ -42,5 +42,10 @@
       "bytes": 23206
     }
   ],
-  "sequenceBytes": 12335156
+  "sequenceBytes": 22313702,
+  "deliveryTier": {
+    "source": "scripts/prepare-trumpet-tier.py",
+    "sourceSHA256": "60da33df079259b9f6ed60a33fa1890c02a90d50bc01a6957a3da340a7e90319",
+    "description": "1600 x 900 Lanczos derivative of approved source WebP frames, WebP quality 95; original and compact tiers unchanged."
+  }
 }
