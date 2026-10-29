@@ -10,8 +10,8 @@
     "width": 1600,
     "height": 1400
   },
-  "manifestSHA256": "6878662db5f9c7d75c009a6c2df14d9577cb447c17714cb7334562dceb37d5f3",
-  "sequenceBytes": 16196548,
+  "manifestSHA256": "667aabed826d943f3bd8841662966ea3af0d06299c39bdc859c3ba729ec37ac6",
+  "sequenceBytes": 28063784,
   "hero": [
     {
       "file": "hero.webp",
@@ -91,5 +91,10 @@
         "bytes": 55814
       }
     ]
+  },
+  "deliveryTier": {
+    "source": "scripts/prepare-scroll-tier.py",
+    "sourceSHA256": "276130ecc8c3f6a79c1b6b2a7daf932f52b27a9ad07db2ab9a52ad47c0daed20",
+    "description": "1280 x 1120 Lanczos derivative of approved source WebP frames, WebP quality 95; original and compact tiers unchanged."
   }
 }

@@ -161,8 +161,9 @@ const inputManifest=JSON.parse(fs.readFileSync(path.join(inputRoot,'manifest.jso
 check(inputManifest.frameCount===181&&inputManifest.initialIndex===0,'Full keystroke narrative');
 check(hash(fs.readFileSync(path.join(root,inputNotice.source),'utf8').replaceAll('\r\n','\n'))===inputNotice.sourceSHA256,'Keystroke renderer provenance');
 check(hash(fs.readFileSync(path.join(inputRoot,'manifest.json')))===inputNotice.manifestSHA256,'Keystroke manifest provenance');
+check(hash(fs.readFileSync(path.join(root,inputNotice.deliveryTier.source),'utf8').replaceAll('\r\n','\n'))===inputNotice.deliveryTier.sourceSHA256,'Delivery tier generation provenance');
 let inputBytes=0;
-for(const [tier,w,h,suffix]of [[inputManifest,1600,1400,''],[inputManifest.compact,960,840,'-960']]){
+for(const [tier,w,h,suffix]of [[inputManifest,1600,1400,''],[inputManifest.compact,960,840,'-960'],[inputManifest.balanced,1280,1120,'-1280']]){
  check(tier.width===w&&tier.height===h&&tier.frames.length===181,'Keystroke responsive tier');
  for(const [i,f]of tier.frames.entries()){
   const safe=f.file===`key-${String(i).padStart(3,'0')}${suffix}.webp`;check(safe,'Safe keystroke filename');if(!safe)continue;
