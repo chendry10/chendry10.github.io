@@ -14,7 +14,7 @@ assert.ok(Math.abs(inputPose(.35)-.5)<1e-9,'Layer reveal uses the full scroll in
 assert.equal(inputPose(.84),1,'CPU holds its final pose through the handoff');
 for(const p of[.05,.65])assert.ok(Math.abs(inputPose(p-1e-8)-inputPose(p+1e-8))<.00001,'Pose mapping remains continuous');
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
-async function fixture({code=source,latency=70,decodeLatency=25,width=760,height=665,change,saveData=false,failFirst=false}={}){
+async function fixture({code=source,latency=70,decodeLatency=25,width=760,height=665,change,saveData=false,failFirst=false,study='processor'}={}){
   let now=0,fetches=0,decoders=0,maxFetches=0,maxDecoders=0,cancelled=0;
   const events=[],requests=[],bitmaps=[],draws=[],samples=[];
   const later=(delay,run)=>events.push({at:now+delay,run});
@@ -57,7 +57,7 @@ async function fixture({code=source,latency=70,decodeLatency=25,width=760,height
   const scope=vm.createContext({Element,document:doc,matchMedia:()=>reduced,ResizeObserver,fetch,createImageBitmap,AbortController,URL,devicePixelRatio:1,performance:{now:()=>now},navigator:{connection:{saveData}},console});
   const module=new vm.SourceTextModule(code,{context:scope,initializeImportMeta(meta){meta.url=pathToFileURL(process.cwd()+'/switch-scene.js').href;}});
   await module.link(()=>{throw Error('Unexpected import');});await module.evaluate();
-  const host=new Element(),abort=new AbortController(),api=await module.namespace.createSwitchScene(host,{signal:abort.signal});await flush();
+  const host=new Element(),abort=new AbortController(),api=await module.namespace.createSwitchScene(host,{signal:abort.signal,study});await flush();
   async function advance(ms){
     const end=now+ms;let count=0;
     while(true){events.sort((a,b)=>a.at-b.at);if(!events.length||events[0].at>end)break;if(++count>100000)throw Error('Runaway decode queue');const event=events.shift();now=event.at;event.run();await flush();}
@@ -137,5 +137,18 @@ assert.ok(improved.exact/improved.steps>.95,'At least 95% of warm targets presen
 const compact=await fixture({change:m=>{m.compact={width:960,height:840,frames:m.frames.map(f=>({...f,width:960,height:840,file:f.file.replace('.webp','-960.webp'),bytes:20000,sha256:'c'+f.sha256.slice(1)}))};}});await compact.advance(5000);assert.equal(compact.draws.at(-1).index,0);assert.ok(compact.bitmaps.every(b=>b.width===960));assert.equal(Number(compact.host.dataset.switchEncodedBytes),121*20000);
 compact.resize(1800,1575);await compact.advance(5000);assert.ok(compact.bitmaps.some(b=>!b.closed&&b.width===1280),'Larger display upgrades to original frames');assert.equal(Number(compact.host.dataset.switchEncodedBytes),121*80000);assert.ok(Number(compact.host.dataset.switchBitmapBytes)<=48*1024*1024);compact.api.dispose();await compact.advance(300);
 const report={passed:true,conditions:'Deterministic 60 Hz input, 70 ms network latency, 25 ms decode, 4.5 s initial dwell; not measured browser FPS',improved};
+// A second authored scene must retain the same bounded decoder and lifecycle.
+const trumpet=await fixture({study:'trumpet',width:1320,height:742,change:m=>{
+  m.width=1920;m.height=1080;
+  m.frames=m.frames.map(f=>({...f,width:1920,height:1080}));
+  m.compact={width:960,height:540,frames:m.frames.map(f=>({...f,width:960,height:540,file:f.file.replace('.webp','-960.webp'),bytes:20000,sha256:'c'+f.sha256.slice(1)}))};
+}});
+await trumpet.advance(5000);
+for(const index of [0,30,100,45,0]){await trumpet.move(index);await trumpet.advance(400);assert.equal(trumpet.draws.at(-1).index,index);}
+assert.ok(Number(trumpet.host.dataset.switchBitmapBytes)<=48*1024*1024,'Landscape frames remain within the decoded budget');
+assert.ok(trumpet.stats().maxFetches<=4&&trumpet.stats().maxDecoders<=2);
+trumpet.api.dispose();await trumpet.advance(500);assert.ok(trumpet.bitmaps.every(b=>b.closed));
+const wrongStudy=await fixture({study:'trumpet'});assert.equal(wrongStudy.host.dataset.switchState,'fallback');assert.equal(wrongStudy.requests.length,0,'A processor manifest cannot masquerade as a trumpet sequence');
+await assert.rejects(()=>fixture({study:'https://untrusted.invalid/manifest.json'}),/Unknown authored study/);
 if(process.argv[2])report.before=await benchmark(fs.readFileSync(process.argv[2],'utf8'));
 console.log(JSON.stringify(report,null,2));

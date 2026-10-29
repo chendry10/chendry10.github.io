@@ -1,0 +1,46 @@
+{
+  "title": "Silver B-flat trumpet",
+  "model": {
+    "title": "B-flat Trumpet Model",
+    "author": "Pakaku",
+    "url": "https://sketchfab.com/3d-models/8fee576c4e854be7aa1b94032f2e0341",
+    "license": "CC BY 4.0",
+    "licenseURL": "https://creativecommons.org/licenses/by/4.0/",
+    "distributionURL": "https://huggingface.co/datasets/allenai/objaverse/resolve/main/glbs/000-098/8fee576c4e854be7aa1b94032f2e0341.glb",
+    "sha256": "5f9611025dae1a3e8807dd2c03795a217de80bea2bba529ef2b83013ef913049"
+  },
+  "changes": "Silver materials, studio lighting, and camera animation. Original relative instrument geometry preserved.",
+  "lighting": {
+    "title": "Studio Small 09",
+    "author": "Sergej Majboroda / Poly Haven",
+    "license": "CC0",
+    "url": "https://polyhaven.com/a/studio_small_09"
+  },
+  "source": "scripts/render-silver-trumpet.py",
+  "sourceSHA256": "1c0d7af7072bacf86ab78240e9efa18f1f66dbc8857fc52bea810607d5560da7",
+  "manifestSHA256": "32b882efb6f872965ad4a49da816613329f821c875f33225d0b06c66b2ea7929",
+  "render": {
+    "engine": "Blender 4.5 Cycles / OPTIX",
+    "samples": 192,
+    "width": 1920,
+    "height": 1080,
+    "frames": 121
+  },
+  "posters": [
+    {
+      "file": "poster.webp",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "57b56deda9c419c225ce1af984f9cfcf145377c8ec048464b6cc8ffca2e31be5",
+      "bytes": 57786
+    },
+    {
+      "file": "poster-960.webp",
+      "width": 960,
+      "height": 540,
+      "sha256": "5075277ba40613b3fe3b45bbce32a17431e79db8b0181d0d754955ef49d8e02f",
+      "bytes": 23206
+    }
+  ],
+  "sequenceBytes": 12335156
+}

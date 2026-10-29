@@ -16,7 +16,10 @@ const MAX_FRAME_LAG=8;
 const TIERS=[640,960,1280,1600];
 const clamp=value=>Math.max(0,Math.min(1,Number.isFinite(value)?value:0));
 
-export async function createSwitchScene(host,{signal}={}){
+export async function createSwitchScene(host,{signal,study='processor'}={}){
+  if(!['processor','trumpet'].includes(study))throw new TypeError('Unknown authored study.');
+  const sequenceURL=study==='trumpet'?new URL('./shared/assets/product/trumpet-sequence/manifest.json',import.meta.url):MANIFEST_URL;
+  const dimensions=study==='trumpet'?[1920,1080,960,540]:[1280,1120,960,840];
   if(!(host instanceof Element))throw new TypeError('A sized switch host is required.');
   scenes.get(host)?.dispose();
   const canvas=document.createElement('canvas');
@@ -178,7 +181,7 @@ export async function createSwitchScene(host,{signal}={}){
   }
   async function fetchFrame(frame,controller){
     try{
-      const url=new URL(frame.file,MANIFEST_URL);url.searchParams.set('v',frame.sha256.slice(0,12));
+      const url=new URL(frame.file,sequenceURL);url.searchParams.set('v',frame.sha256.slice(0,12));
       const response=await fetch(url,{signal:controller.signal,priority:painted<0?'high':'low'});
       if(!response.ok)throw new Error('Frame unavailable');
       const blob=await response.blob();
@@ -300,21 +303,21 @@ export async function createSwitchScene(host,{signal}={}){
       width=box.width;height=box.height;sizeDirty=true;redraw();
     });
     resizeObserver.observe(host);
-    const response=await fetch(MANIFEST_URL,{signal:manifestAbort.signal,cache:'no-cache'});
+    const response=await fetch(sequenceURL,{signal:manifestAbort.signal,cache:'no-cache'});
     if(!response.ok)throw new Error('Manifest unavailable');
     const source=await response.json();
     if(dead||signal?.aborted)return api;
-    if(source.version!==1||source.width!==1280||source.height!==1120||!Number.isInteger(source.frameCount)||source.frameCount<101||source.frameCount>401||!Number.isInteger(source.initialIndex)||!Array.isArray(source.frames)||source.frames.length!==source.frameCount||source.frames[0]?.progress!==0||source.frames.at(-1)?.progress!==1||source.frames[source.initialIndex]?.progress!==0)throw new Error('Invalid sequence manifest');
+    if(source.version!==1||source.width!==dimensions[0]||source.height!==dimensions[1]||!Number.isInteger(source.frameCount)||source.frameCount<101||source.frameCount>401||!Number.isInteger(source.initialIndex)||!Array.isArray(source.frames)||source.frames.length!==source.frameCount||source.frames[0]?.progress!==0||source.frames.at(-1)?.progress!==1||source.frames[source.initialIndex]?.progress!==0)throw new Error('Invalid sequence manifest');
     for(let index=0;index<source.frameCount;index++){
       const frame=source.frames[index];
       if(frame.index!==index||frame.file!==`key-${String(index).padStart(3,'0')}.webp`||frame.width!==source.width||frame.height!==source.height||typeof frame.progress!=='number'||!Number.isFinite(frame.progress)||frame.progress<0||frame.progress>1||(index&&frame.progress<=source.frames[index-1].progress)||!Number.isInteger(frame.bytes)||frame.bytes<1||frame.bytes>4*1024*1024||!/^[a-f0-9]{64}$/.test(frame.sha256))throw new Error('Invalid sequence frame');
     }
     if(source.compact){
       const compact=source.compact;
-      if(compact.width!==960||compact.height!==840||!Array.isArray(compact.frames)||compact.frames.length!==source.frameCount)throw new Error('Invalid compact sequence');
+      if(compact.width!==dimensions[2]||compact.height!==dimensions[3]||!Array.isArray(compact.frames)||compact.frames.length!==source.frameCount)throw new Error('Invalid compact sequence');
       for(let index=0;index<source.frameCount;index++){
         const frame=compact.frames[index];
-        if(frame.index!==index||frame.file!==`key-${String(index).padStart(3,'0')}-960.webp`||frame.width!==960||frame.height!==840||frame.progress!==source.frames[index].progress||!Number.isInteger(frame.bytes)||frame.bytes<1||frame.bytes>4*1024*1024||!/^[a-f0-9]{64}$/.test(frame.sha256))throw new Error('Invalid compact frame');
+        if(frame.index!==index||frame.file!==`key-${String(index).padStart(3,'0')}-960.webp`||frame.width!==dimensions[2]||frame.height!==dimensions[3]||frame.progress!==source.frames[index].progress||!Number.isInteger(frame.bytes)||frame.bytes<1||frame.bytes>4*1024*1024||!/^[a-f0-9]{64}$/.test(frame.sha256))throw new Error('Invalid compact frame');
       }
     }
     const unique=new Map([...source.frames,...(source.compact?.frames||[])].map(frame=>[frame.sha256,frame.bytes]));

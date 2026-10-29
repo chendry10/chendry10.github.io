@@ -22,9 +22,9 @@ const omitted=new Set(['.git','qa','node_modules','key-renders']);
 const publicationInventory=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>omitted.has(entry.name)?[]:entry.isDirectory()?publicationInventory(path.join(dir,entry.name)):[path.join(dir,entry.name)]);
 for(const file of publicationInventory(root)){
   const relative=path.relative(root,file).replaceAll(path.sep,'/');
-  check(!/\.(?:blend\d*|exr|hdr|fbx|step|stp|key|pem|sqlite|csv|xlsx)$|(^|\/)\.env(?:\.|$)|^shared\/assets\/product\/key-sequence\/.*\.png$/i.test(relative),`No raw or private publication file: ${relative}`);
+  check(!/\.(?:blend\d*|exr|hdr|fbx|glb|gltf|step|stp|key|pem|sqlite|csv|xlsx)$|(^|\/)\.env(?:\.|$)|^shared\/assets\/product\/key-sequence\/.*\.png$/i.test(relative),`No raw or private publication file: ${relative}`);
 }
-const allowedHosts=new Set(['chendry10.github.io','lyrelink.com','typingagent.com','github.com','www.linkedin.com','unsplash.com']);
+const allowedHosts=new Set(['chendry10.github.io','lyrelink.com','typingagent.com','github.com','www.linkedin.com','unsplash.com','sketchfab.com','creativecommons.org']);
 function reference(ref,from){
   if(ref.startsWith('#')){check(new RegExp(`\\bid=["']${ref.slice(1)}["']`).test(html),`Anchor ${ref}`);return;}
   if(ref.startsWith('mailto:')){check(ref==='mailto:cameron.hendry@hotmail.com','Authorized email link');return;}
@@ -52,7 +52,7 @@ for(const m of html.matchAll(/\bsrcset="([^"]+)"/g))for(const item of m[1].split
 for(const file of files){
   const relative=path.relative(root,file).replaceAll(path.sep,'/');
   check(!fs.lstatSync(file).isSymbolicLink(),`No symlink: ${relative}`);
-  check(!/(^|\/)(qa|capture-frames|capture-direct|node_modules|\.git)(\/|$)|\.(?:csv|xlsx|sqlite|key|pem|blend\d*|exr|hdr|fbx|step|stp)$|(^|\/)\.env|^shared\/assets\/product\/key-sequence\/.*\.png$/i.test(relative),`Public artifact only: ${relative}`);
+  check(!/(^|\/)(qa|capture-frames|capture-direct|node_modules|\.git)(\/|$)|\.(?:csv|xlsx|sqlite|key|pem|blend\d*|exr|hdr|fbx|glb|gltf|step|stp)$|(^|\/)\.env|^shared\/assets\/product\/key-sequence\/.*\.png$/i.test(relative),`Public artifact only: ${relative}`);
   if(/\.(?:html|css|js|json|xml|md|txt)$/.test(file)){
     try{new TextDecoder('utf-8',{fatal:true}).decode(fs.readFileSync(file));check(true,`UTF-8 ${relative}`);}
     catch{check(false,`Invalid UTF-8 ${relative}`);}
@@ -156,6 +156,23 @@ for(const variant of processorNotice.variants){
 check(hash(fs.readFileSync(path.join(root,processorNotice.source),'utf8').replaceAll('\r\n','\n'))===processorNotice.sourceSHA256,'CPU authored source provenance');
 check(html.includes('processor-sequence/hero.webp')&&!html.includes('keystroke-hero.webp'),'CPU is the active opening image');
 check(fs.readFileSync(path.join(root,'switch-scene.js'),'utf8').includes('processor-sequence/manifest.json'),'CPU is the active scroll sequence');
+const trumpetRoot=path.join(root,'shared/assets/product/trumpet-sequence');
+const trumpet=JSON.parse(fs.readFileSync(path.join(trumpetRoot,'manifest.json')));
+const trumpetNotice=JSON.parse(fs.readFileSync(path.join(trumpetRoot,'provenance.json')));
+check(trumpet.frameCount===121&&trumpet.frames.length===121&&trumpet.compact.frames.length===121,'Complete trumpet sequence and compact alternative');
+check(trumpetNotice.model.license==='CC BY 4.0'&&html.includes('Trumpet model by Pakaku')&&html.includes(trumpetNotice.model.licenseURL),'Visible original model attribution and license');
+check(hash(fs.readFileSync(path.join(root,trumpetNotice.source),'utf8').replaceAll('\r\n','\n'))===trumpetNotice.sourceSHA256,'Trumpet renderer provenance');
+check(hash(fs.readFileSync(path.join(trumpetRoot,'manifest.json')))===trumpetNotice.manifestSHA256,'Trumpet manifest provenance');
+let trumpetBytes=0;
+for(const [frames,width,height,suffix] of [[trumpet.frames,1920,1080,''],[trumpet.compact.frames,960,540,'-960']]){
+  for(const [index,asset] of frames.entries()){
+    const bytes=fs.readFileSync(path.join(trumpetRoot,asset.file));trumpetBytes+=bytes.length;
+    check(asset.file===`key-${String(index).padStart(3,'0')}${suffix}.webp`&&asset.index===index&&asset.progress===index/120,'Ordered trumpet frames');
+    check(hash(bytes)===asset.sha256&&bytes.length===asset.bytes&&webpSize(bytes)?.join('x')===`${width}x${height}`,'Trumpet frame dimensions and integrity');
+  }
+}
+check(trumpetBytes<=32*1024*1024&&trumpetBytes===trumpetNotice.sequenceBytes,'Trumpet encoded sequence fits the player budget');
+for(const asset of trumpetNotice.posters){const bytes=fs.readFileSync(path.join(trumpetRoot,asset.file));check(hash(bytes)===asset.sha256&&webpSize(bytes)?.join('x')===`${asset.width}x${asset.height}`,'Responsive trumpet poster integrity');}
 check(hash(pdf)==='1e9c5a727407089a81f3761cc1530ab8eddbfad3993c7ba137d8e52020909f9d','Approved one-page PDF with verified portfolio link');
 check(fs.existsSync('.nojekyll'),'Buildless GitHub Pages deployment');
 check(!fs.existsSync('.openai'),'No former hosting configuration');
