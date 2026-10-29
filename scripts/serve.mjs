@@ -13,6 +13,18 @@ http.createServer((req,res)=>{
   const file=path.resolve(root,'.'+(decoded==='/'?'/index.html':decoded));
   if(hidden||!file.startsWith(root+path.sep)||!['GET','HEAD'].includes(req.method)){res.writeHead(404).end('Not found');return;}
   if(!fs.existsSync(file)||!fs.statSync(file).isFile()){res.writeHead(404).end('Not found');return;}
-  res.writeHead(200,{'Content-Type':mime[path.extname(file)]||'application/octet-stream','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});
-  if(req.method==='HEAD')res.end();else fs.createReadStream(file).pipe(res);
+  const size=fs.statSync(file).size;
+  const headers={'Content-Type':mime[path.extname(file)]||'application/octet-stream','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Accept-Ranges':'bytes','Content-Length':size};
+  let start=0,end=size-1,status=200;
+  if(req.headers.range){
+    const match=/^bytes=(\d*)-(\d*)$/.exec(req.headers.range);
+    if(match&&(match[1]||match[2])){
+      start=match[1]?Number(match[1]):Math.max(0,size-Number(match[2]));
+      end=match[1]&&match[2]?Math.min(size-1,Number(match[2])):size-1;
+    }else start=size;
+    if(!Number.isSafeInteger(start)||!Number.isSafeInteger(end)||start>=size||end<start){res.writeHead(416,{'Content-Range':`bytes */${size}`}).end();return;}
+    status=206;headers['Content-Range']=`bytes ${start}-${end}/${size}`;headers['Content-Length']=end-start+1;
+  }
+  res.writeHead(status,headers);
+  if(req.method==='HEAD'||!size)res.end();else fs.createReadStream(file,{start,end}).pipe(res);
 }).listen(port,'127.0.0.1',()=>console.log(`Local: http://127.0.0.1:${port}`));

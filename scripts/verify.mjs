@@ -154,8 +154,32 @@ for(const variant of processorNotice.variants){
   check(hash(bytes)===variant.sha256&&bytes.length===variant.bytes&&webpSize(bytes)?.join('x')===`${variant.width}x${variant.height}`,`CPU responsive hero ${variant.width}`);
 }
 check(hash(fs.readFileSync(path.join(root,processorNotice.source),'utf8').replaceAll('\r\n','\n'))===processorNotice.sourceSHA256,'CPU authored source provenance');
-check(html.includes('processor-sequence/hero.webp')&&!html.includes('keystroke-hero.webp'),'CPU is the active opening image');
-check(fs.readFileSync(path.join(root,'switch-scene.js'),'utf8').includes('processor-sequence/manifest.json'),'CPU is the active scroll sequence');
+check(html.includes('keystroke-sequence/hero.webp')&&!html.includes('processor-sequence/hero.webp'),'Keystroke story is the active opening image');
+check(fs.readFileSync(path.join(root,'motion.js'),'utf8').includes("study:'keystroke'"),'Keystroke story is the active scroll sequence');
+const inputRoot=path.join(root,'shared/assets/product/keystroke-sequence');
+const inputManifest=JSON.parse(fs.readFileSync(path.join(inputRoot,'manifest.json'))),inputNotice=JSON.parse(fs.readFileSync(path.join(inputRoot,'provenance.json')));
+check(inputManifest.frameCount===181&&inputManifest.initialIndex===0,'Full keystroke narrative');
+check(hash(fs.readFileSync(path.join(root,inputNotice.source),'utf8').replaceAll('\r\n','\n'))===inputNotice.sourceSHA256,'Keystroke renderer provenance');
+check(hash(fs.readFileSync(path.join(inputRoot,'manifest.json')))===inputNotice.manifestSHA256,'Keystroke manifest provenance');
+let inputBytes=0;
+for(const [tier,w,h,suffix]of [[inputManifest,1600,1400,''],[inputManifest.compact,960,840,'-960']]){
+ check(tier.width===w&&tier.height===h&&tier.frames.length===181,'Keystroke responsive tier');
+ for(const [i,f]of tier.frames.entries()){
+  const safe=f.file===`key-${String(i).padStart(3,'0')}${suffix}.webp`;check(safe,'Safe keystroke filename');if(!safe)continue;
+  const b=fs.readFileSync(path.join(inputRoot,f.file));inputBytes+=b.length;
+  check(f.index===i&&f.progress===i/180&&f.width===w&&f.height===h,'Ordered keystroke frames');
+  check(hash(b)===f.sha256&&b.length===f.bytes&&webpSize(b)?.join('x')===`${w}x${h}`,'Keystroke image integrity');
+ }
+}
+check(inputBytes===inputNotice.sequenceBytes&&inputBytes<=32*1024*1024,'Keystroke sequence fits encoded cache');
+for(const f of inputNotice.hero){const b=fs.readFileSync(path.join(inputRoot,f.file));check(hash(b)===f.sha256&&b.length===f.bytes&&webpSize(b)?.join('x')===`${f.width}x${f.height}`,'High resolution opening image integrity');}
+check(inputNotice.gameplay.keys.map(x=>x.key).join('')==='bowl'&&inputNotice.gameplay.originalDimensions.join('x')==='2560x1326','Real recorded word and source aspect ratio');
+check(hash(fs.readFileSync(path.join(inputRoot,'projection.json')))===inputNotice.projection.sha256,'Audited Blender projection integrity');
+const projection=JSON.parse(fs.readFileSync(path.join(inputRoot,'projection.json')));
+check(projection.keyboardFrameMargin>.02,'Final keyboard stays inside the frame');
+for(const asset of inputNotice.handoff.posters){const bytes=fs.readFileSync(path.join(inputRoot,asset.file));check(hash(bytes)===asset.sha256&&bytes.length===asset.bytes,'Matching gameplay handoff poster integrity');}
+for(const file of ['input-handoff.js','gameplay-film.js'])check(fs.readFileSync(path.join(root,'motion.js'),'utf8').includes(`from './${file}?v=${moduleVersion(file)}'`),'Handoff module cache version');
+check(html.includes(`./keystroke.css?v=${moduleVersion('keystroke.css')}`),'Opening style cache version');
 const trumpetRoot=path.join(root,'shared/assets/product/trumpet-sequence');
 const trumpet=JSON.parse(fs.readFileSync(path.join(trumpetRoot,'manifest.json')));
 const trumpetNotice=JSON.parse(fs.readFileSync(path.join(trumpetRoot,'provenance.json')));
