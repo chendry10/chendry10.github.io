@@ -6,6 +6,12 @@
 export const SCORE_ARRIVAL_END=.30;
 export const scoreFolioProgress=value=>Math.max(0,Math.min(1,(value-SCORE_ARRIVAL_END)/(1-SCORE_ARRIVAL_END)));
 
+// This source pose and the ownership boundary both use raw scroll progress.
+export function scoreRevealPose(rawProgress){
+  const p=Math.max(0,Math.min(1,(rawProgress-.73)/.25)),t=p*p*(3-2*p);
+  return {opacity:t,x:(1-t)*65,y:(1-t)*100,rz:-18*(1-t),scale:.25+.75*t};
+}
+
 // Fixed viewport endpoints give the travelling sheet one continuous path.
 // In particular, no halfway heading-clearance branch can teleport the sheet.
 export function scoreArrivalPose({from,to,paperWidth,width,height},progress){
@@ -70,7 +76,12 @@ export function createScoreJourney({music, scoreAct, demo}) {
   function measure(){
     if(dead)return;
     const y=scrollY,height=innerHeight,width=innerWidth;
-    const src=source.getBoundingClientRect(),section=scoreAct.getBoundingClientRect();
+    const anchor=music.querySelector('[data-score-origin]'),musicStage=music.querySelector('.lyre-stage');
+    const pinned=anchor&&musicStage&&document.documentElement.classList.contains('concerto-motion');
+    const src=(pinned?anchor:source).getBoundingClientRect(),section=scoreAct.getBoundingClientRect();
+    const musicBox=pinned?music.getBoundingClientRect():null,musicStageBox=pinned?musicStage.getBoundingClientRect():null;
+    const musicEnd=pinned?musicBox.top+y+musicBox.height-height:0;
+    const sourceY=pinned?musicEnd+src.top-musicStageBox.top:src.top+y;
     const sr=stage.getBoundingClientRect(),fr=field.getBoundingClientRect();
     const heading=scoreAct.querySelector('.score-routing-heading').getBoundingClientRect();
     const paperWidth=parseFloat(field.style.getPropertyValue('--folio-paper-width'))||nativePaper.offsetWidth;
@@ -99,11 +110,11 @@ export function createScoreJourney({music, scoreAct, demo}) {
       width,height,paperWidth,paperHeight,fieldWidth:fr.width,fieldHeight:fr.height,
       fieldX:fr.left,fieldY:fr.top-sr.top,headingBottom:heading.bottom-sr.top,
       pinStart,pinRange,pinEnd,progressEnd,
-      source:{x:src.left,y:src.top+y,w:src.width,h:src.height},target,flight,
+      source:{x:src.left,y:sourceY,w:src.width,h:src.height},target,flight,
       stackX:(fr.width-paperWidth)/2,
       stackY:Math.min(74,Math.max(44,(fr.height-paperHeight-90)*.5)),
       slotX:fr.width*.165-paperWidth/2,
-      begin:src.top+y+src.height*.5-height*.56,
+      begin:pinned?musicEnd:src.top+y+src.height*.5-height*.56,
       enterEnd:pinStart+pinRange*SCORE_ARRIVAL_END,
       exitStart,liftEnd,approachStart,approachEnd,
     };

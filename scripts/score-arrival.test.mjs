@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {createScoreJourney,scoreArrivalPose,scoreFolioProgress,SCORE_ARRIVAL_END} from '../score-journey.js';
+import {createScoreJourney,scoreArrivalPose,scoreFolioProgress,scoreRevealPose,SCORE_ARRIVAL_END} from '../score-journey.js';
 
 // Exercise continuous motion at desktop aspect ratios, including the old
 // halfway snap and the arrival-to-folio ownership boundary.
@@ -31,6 +31,13 @@ assert.equal(scoreFolioProgress(0),0);
 assert.equal(scoreFolioProgress(SCORE_ARRIVAL_END),0,'Stack waits for the travelling page');
 assert.ok(scoreFolioProgress(SCORE_ARRIVAL_END+1e-7)<1e-6,'Folio starts continuously');
 assert.equal(scoreFolioProgress(1),1,'Full parts sequence is retained');
+// The source reaches its exact anchor before raw scroll transfers ownership,
+// even if the separate decorative camera is still catching up.
+for(const raw of [.98,.99,1,1.2]){
+  const pose=scoreRevealPose(raw);
+  assert.equal(pose.opacity,1);assert.equal(pose.x,0);assert.equal(pose.y,0);assert.equal(pose.scale,1);
+}
+assert.equal(scoreRevealPose(.73).opacity,0);
 // Exercise the actual DOM renderer with raw scroll at the ownership boundary
 // while the scheduler still carries a later pose after reversing direction.
 class Element extends EventTarget{
@@ -69,5 +76,20 @@ for(const laggingProgress of [0,.15,.4]){
   assert.ok(before.every((value,i)=>Math.abs(value-after[i])<.01),`No ownership jump with lagging folio progress ${laggingProgress}`);
 }
 journey.dispose();
+// Measuring halfway through a sticky scene must retain the same final anchor.
+const anchor=element({left:800,top:6200,width:358,height:277});
+const musicStage=element({top:6000});music.rect={top:6000,height:1440};
+music.selectors.set('[data-score-origin]',anchor);music.selectors.set('.lyre-stage',musicStage);
+documentStub.documentElement={classList:{contains:()=>true}};
+const pinnedJourney=createScoreJourney({music,scoreAct:section,demo:new Element()});
+const pinnedScene=documentStub.body.children.at(-1).children[0];
+const pinnedTrack=pinnedScene.children[0];
+pinnedJourney.render(6720,false,0);
+const beforeMeasure=[pinnedScene.style.transform,pinnedTrack.style.transform];
+globalThis.scrollY=6400;music.rect.top=-400;musicStage.rect.top=0;anchor.rect.top=200;
+for(const el of [section,stage,field])el.rect.top-=6400;heading.rect.bottom-=6400;
+pinnedJourney.measure();pinnedJourney.render(6720,false,0);
+assert.deepEqual([pinnedScene.style.transform,pinnedTrack.style.transform],beforeMeasure,'Sticky-source geometry stays stable after mid-scroll remeasurement');
+pinnedJourney.dispose();
 for(const key of ['document','scrollY','innerHeight','innerWidth'])delete globalThis[key];
 console.log('Score arrival: continuous path, bounded speed, exact endpoints and delayed folio passed.');
