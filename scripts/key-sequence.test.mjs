@@ -39,8 +39,8 @@ async function fixture({code=source,latency=70,decodeLatency=25,width=760,height
   class ResizeObserver{constructor(fn){this.fn=fn;observer=this;}observe(){this.fn([{contentRect:{width,height}}]);}disconnect(){}}
   const fetch=async(url,{signal}={})=>{
     if(url.pathname.endsWith('manifest.json'))return{ok:true,json:async()=>manifest};
-    const index=Number(url.pathname.match(/key-(\d+)(?:-960|-1280)?\.webp$/)[1]);
-    const frame=url.pathname.includes('-1280.webp')?manifest.balanced.frames[index]:url.pathname.includes('-960.webp')?manifest.compact.frames[index]:manifest.frames[index];
+    const index=Number(url.pathname.match(/key-(\d+)(?:-960|-1280|-1600)?\.webp$/)[1]);
+    const frame=(url.pathname.includes('-1280.webp')||url.pathname.includes('-1600.webp'))?manifest.balanced.frames[index]:url.pathname.includes('-960.webp')?manifest.compact.frames[index]:manifest.frames[index];
     requests.push({index,time:now,file:url.pathname});fetches++;maxFetches=Math.max(maxFetches,fetches);
     return new Promise((resolve,reject)=>{
       let done=false;
@@ -211,3 +211,23 @@ for(const index of [...Array.from({length:121},(_,i)=>i),...Array.from({length:1
 }
 ownerLags.sort((a,b)=>a-b);assert.ok(ownerLags[Math.floor(ownerLags.length*.95)]<=1,'Page-owned continuous forward/reverse traversal stays within one pose');
 movingOwner.api.dispose();await movingOwner.advance(300);assert.ok(movingOwner.bitmaps.every(b=>b.closed));
+
+const fastTrumpet=await fixture({study:'trumpet',width:1320,height:742,change:m=>{
+ m.width=1920;m.height=1080;m.frames=m.frames.map(f=>({...f,width:1920,height:1080}));
+ m.balanced={width:1600,height:900,frames:m.frames.map(f=>({...f,width:1600,height:900,file:f.file.replace('.webp','-1600.webp'),bytes:40000,sha256:'b'+f.sha256.slice(1)}))};
+}});
+await fastTrumpet.advance(4500);
+assert.ok(fastTrumpet.requests.every(r=>r.file.endsWith('-1600.webp')),'Desktop trumpet selects ready-sized native tier');
+for(const i of [0,40,100,30,120,0]){await fastTrumpet.move(i);await fastTrumpet.advance(250);assert.equal(fastTrumpet.api.getFrame(),i);}
+assert.ok(fastTrumpet.decodeOptions.every(o=>!o.resizeWidth));assert.ok(Number(fastTrumpet.host.dataset.switchBitmapBytes)<=48*1024*1024);
+fastTrumpet.api.dispose();await fastTrumpet.advance(300);assert.ok(fastTrumpet.bitmaps.every(b=>b.closed));
+const warming=await fixture({onFrameReady:()=>{}});await warming.advance(5000);
+assert.equal(warming.draws.length,0);assert.equal(warming.requests.length,121,'Offscreen warmup does not wait for its first paint');warming.api.dispose();
+
+assert.equal(fastTrumpet.api.getFrame(),-1,'Disposed or failed scene exposes the poster frame, never a stale monitor pose');
+
+let fallbackWakes=0;
+const lost=await fixture({onFrameReady:()=>fallbackWakes++});await lost.advance(5000);lost.api.setProgress(0);
+const wakesBefore=fallbackWakes;
+lost.host.children[0].dispatchEvent(new Event('contextlost',{cancelable:true}));
+assert.equal(lost.api.getFrame(),-1);assert.equal(fallbackWakes,wakesBefore+1,'Internal context failure wakes the owner to hide its stale projection');assert.equal(lost.host.children.length,0);

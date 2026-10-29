@@ -9,3 +9,6 @@
  html.concerto-still .relay-scene{position:relative;inset:auto;height:auto;margin-top:18px}
  html.concerto-still .relay-key{position:relative;inset:auto}
 }
+
+/* One native video stays playing while its monitor plane follows the camera. */
+.monitor-viewport{position:absolute;inset:0;z-index:3;pointer-events:none}

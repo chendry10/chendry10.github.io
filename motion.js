@@ -1,9 +1,10 @@
+import {MONITOR_QUADS} from './monitor-quads.js?v=72d3ba51103b';
 import {scrollViewportHeight,scrollLayoutChanged} from './scroll-viewport.js?v=ac31df9665ba';
 import {createScoreFolio} from './score-folio.js';
 import {createScoreJourney,scoreFolioProgress,scoreRevealPose} from './score-journey.js?v=434bb2ff8d46';
-import {createGameplayFilm} from './gameplay-film.js?v=a71be8c3dbb1';
-import {screenHandoffMatrix} from './input-handoff.js?v=a9845ab20e0d';
-import {createProductBridge} from './product-bridge.js?v=e9ead324933b';
+import {createGameplayFilm} from './gameplay-film.js?v=46b4c9094597';
+import {screenHandoffMatrix,monitorImageBox} from './input-handoff.js?v=d2032c8467a3';
+import {createProductBridge} from './product-bridge.js?v=99b04a900fba';
 
 // One native, demand-driven scheduler owns all decorative poses.
 const root=document.documentElement;
@@ -16,6 +17,7 @@ const keyHost=document.querySelector('.relay-key');
 const heading=document.querySelector('.relay-heading');
 const responseHeading=document.querySelector('.relay-response-heading');
 const product=document.querySelector('.relay-product');
+const monitorViewport=document.querySelector('.monitor-viewport');
 const bay=document.querySelector('[data-product-bay]');
 const productShell=product.querySelector('.relay-product-shell');
 const phases=[...document.querySelectorAll('[data-relay-step]')];
@@ -31,7 +33,7 @@ let journey=createScoreJourney({music,scoreAct,demo});
 let bridge=createProductBridge({product,bay,opening});
 const filmVideo=product.querySelector('[data-gameplay-video]');
 const filmButton=product.querySelector('[data-film-toggle]');
-let film=createGameplayFilm(filmVideo,filmButton,{startTime:4.8});
+let film=createGameplayFilm(filmVideo,filmButton,{startTime:3,resetOnDeactivate:false});
 const osReduced=matchMedia('(prefers-reduced-motion:reduce)');
 const clamp=n=>Math.max(0,Math.min(1,n));
 const part=(p,a,b)=>clamp((p-a)/(b-a));
@@ -40,7 +42,7 @@ const mix=(a,b,t)=>a+(b-a)*t;
 const style=(el,key,value)=>{if(el&&el.style[key]!==value)el.style[key]=value;};
 const data=(el,key,value)=>{if(el.dataset[key]!==value)el.dataset[key]=value;};
 let metrics={},width=innerWidth,height=innerHeight,still=true,layoutDirty=true;
-let frame=0,lastTime=0,poses=null,hidden=document.hidden,renderCount=0;
+let frame=0,lastTime=0,poses=null,hidden=document.hidden,renderCount=0,filmLayoutDirty=false;
 let key=null,keyAbort=null,keyTicket=0,keyLoading=false,keyLatest=0,idle=0;
 let trumpet=null,trumpetAbort=null,trumpetTicket=0,trumpetLoading=false;
 const quiet=()=>root.classList.contains('motion-off')||osReduced.matches;
@@ -55,7 +57,7 @@ function measure(){
   data(root,'scrollEngine',still?'off':'concerto-native');
   const y=scrollY;
   const bounds=[opening,music,scoreAct].map(el=>{const r=el.getBoundingClientRect();return {top:r.top+y,height:r.height,range:Math.max(1,r.height-height)};});
-  metrics={opening:bounds[0],music:bounds[1],scores:bounds[2],keyBox:{x:keyHost.offsetLeft,y:keyHost.offsetTop,w:keyHost.offsetWidth,h:keyHost.offsetHeight},productWidth:Math.min(width*.90,Math.min(height*.72,Math.max(160,height-240))*32/27,1200)};
+  metrics={stageWidth:openingStage.clientWidth,opening:bounds[0],music:bounds[1],scores:bounds[2],keyBox:{x:keyHost.offsetLeft,y:keyHost.offsetTop,w:keyHost.offsetWidth,h:keyHost.offsetHeight},productWidth:Math.min(width*.90,Math.min(height*.72,Math.max(160,height-240))*32/27,1200)};
   folio.measure();journey.measure();bridge.measure();key?.resize();trumpet?.resize();layoutDirty=false;poses=null;
 }
 function releaseKey(){
@@ -65,7 +67,7 @@ function releaseKey(){
 function warmKey(){
   if(still||hidden||key||keyLoading)return;
   keyLoading=true;const ticket=++keyTicket;keyAbort=new AbortController();const signal=keyAbort.signal;
-  import('./switch-scene.js?v=4c25f4832e0f').then(({createSwitchScene})=>createSwitchScene(keyHost,{signal,study:'keystroke',onFrameReady:schedule})).then(controller=>{
+  import('./switch-scene.js?v=b25a49ad0110').then(({createSwitchScene})=>createSwitchScene(keyHost,{signal,study:'keystroke',onFrameReady:schedule})).then(controller=>{
     if(signal.aborted||ticket!==keyTicket||quiet()){controller.dispose();return;}
     key=controller;keyLoading=false;controller.setProgress(keyLatest);schedule();
   }).catch(()=>{if(ticket===keyTicket){keyLoading=false;data(keyHost,'switchState','fallback');}});
@@ -74,7 +76,7 @@ function releaseTrumpet(){trumpetTicket++;trumpetAbort?.abort();trumpetAbort=nul
 function warmTrumpet(){
   if(still||hidden||trumpet||trumpetLoading)return;
   trumpetLoading=true;const ticket=++trumpetTicket;trumpetAbort=new AbortController();const signal=trumpetAbort.signal;
-  import('./switch-scene.js?v=4c25f4832e0f').then(({createSwitchScene})=>createSwitchScene(trumpetHost,{signal,study:'trumpet',onFrameReady:schedule})).then(controller=>{
+  import('./switch-scene.js?v=b25a49ad0110').then(({createSwitchScene})=>createSwitchScene(trumpetHost,{signal,study:'trumpet',onFrameReady:schedule})).then(controller=>{
     if(signal.aborted||ticket!==trumpetTicket||quiet()){controller.dispose();return;}
     trumpet=controller;trumpetLoading=false;controller.setProgress(poses?.music||0);schedule();
   }).catch(()=>{if(ticket===trumpetTicket){trumpetLoading=false;data(trumpetHost,'switchState','fallback');}});
@@ -110,6 +112,12 @@ function render(now){
   if(ownsProduct)style(productShell,'clipPath','none');
   if(near(metrics.opening,y)||still){
     keyLatest=inputPose(p);
+    if(key&&!still&&p<.9)key.setProgress(keyLatest);
+    // Track the frame actually painted, so decode latency cannot detach the
+    // live video from the physical monitor in the background image.
+    const shown=Math.max(0,Math.min(180,key?.getFrame()??0));
+    const monitorQuad=MONITOR_QUADS[shown];
+    const monitorVisible=monitorQuad.some(point=>point[1]>0)&&monitorQuad.some(point=>point[1]<1);
     style(relay,'visibility','visible');style(relay,'opacity','1');
     const nameExit=ease(part(p,.025,.12));
     identity.forEach(el=>{style(el,'opacity',(1-nameExit).toFixed(4));style(el,'visibility',nameExit>.999?'hidden':'visible');});
@@ -126,9 +134,11 @@ function render(now){
     style(keyHost,'opacity',(1-ease(part(arrival,.03,.35))).toFixed(4));
     style(keyHost,'transform',`scale(${introScale.toFixed(4)})`);
     if(!ownsProduct){
-      style(product,'opacity',ease(part(arrival,0,.18)).toFixed(4));style(product,'visibility',arrival>.001?'visible':'hidden');
+      style(product,'opacity',monitorVisible?'1':'0');style(product,'visibility',monitorVisible?'visible':'hidden');
+      const box=metrics.keyBox;
+      style(monitorViewport,'clipPath',`inset(${Math.max(0,box.y)*(1-arrival)}px ${Math.max(0,metrics.stageWidth-box.x-box.w)*(1-arrival)}px ${Math.max(0,height-box.y-box.h)*(1-arrival)}px ${Math.max(0,box.x)*(1-arrival)}px)`);
       style(product,'transformOrigin','0 0');
-      style(product,'transform',`matrix3d(${screenHandoffMatrix({keyBox:metrics.keyBox,productWidth:metrics.productWidth,viewportWidth:width,viewportHeight:height},arrival).join(',')})`);
+      style(product,'transform',`matrix3d(${screenHandoffMatrix({keyBox:monitorImageBox(metrics.keyBox),productWidth:metrics.productWidth,viewportWidth:metrics.stageWidth,viewportHeight:height,quad:monitorQuad},arrival).join(',')})`);
       style(productShell,'clipPath',`inset(0 0 ${(100*(1-1326/2160)*(1-ease(part(arrival,.15,1)))).toFixed(4)}% 0)`);
       if(product.inert!==(arrival<.985))product.inert=arrival<.985;
     }
@@ -136,7 +146,6 @@ function render(now){
     const phase=p<.22?0:p<.46?1:p<.73?2:3;
     data(opening,'narrativePhase',p<.12?'identity':['assembly','contact','signal','response'][phase]);
     phases.forEach((el,i)=>data(el,'active',String(i===phase)));
-    if(key&&!still&&p<.9)key.setProgress(keyLatest);
   }
   if(near(metrics.music,y)||still){
     trumpet?.setProgress(poses.music);
@@ -149,8 +158,10 @@ function render(now){
   else releaseTrumpet();
   if(near(metrics.scores,y)||still)folio.render(poses.scores,still||width<=900);
   journey.render(y,still||width<=900,poses.scores);
-  if(!still&&near(metrics.opening,y)&&p>.52)film.prepare();
-  film.setActive(!root.classList.contains('motion-off')&&!osReduced.matches&&(still||p>=.84));
+  if(!still&&near(metrics.opening,y)&&p>.12)film.prepare();
+  film.setActive(!root.classList.contains('motion-off')&&!osReduced.matches&&(still||p>=.25));
+  // Reparenting a media element may pause it; resume on the next owned frame.
+  if(filmLayoutDirty){filmLayoutDirty=false;film.refresh();}
   if(!still&&y<metrics.opening.top+metrics.opening.height+height)prewarm();
   else if(still||y>metrics.opening.top+metrics.opening.height+height*2)releaseKey();
   data(root,'motionFrames',String(++renderCount));
@@ -164,11 +175,11 @@ addEventListener('resize',()=>{
   if(scrollLayoutChanged({width,height},next)){layoutDirty=true;schedule();}
 },{passive:true});
 document.addEventListener('portfolio:motion',()=>{if(quiet()){releaseKey();releaseTrumpet();}layoutDirty=true;schedule();});
-for(const name of ['portfolio:journey-layout','portfolio:product-layout'])document.addEventListener(name,()=>{layoutDirty=true;schedule();});
+for(const name of ['portfolio:journey-layout','portfolio:product-layout'])document.addEventListener(name,()=>{if(name==='portfolio:product-layout')filmLayoutDirty=true;layoutDirty=true;schedule();});
 osReduced.addEventListener('change',()=>{layoutDirty=true;schedule();});
 document.fonts.ready.then(()=>{layoutDirty=true;schedule();prewarm();});
 document.addEventListener('visibilitychange',()=>{hidden=document.hidden;if(hidden){cancelAnimationFrame(frame);frame=0;}else{lastTime=0;schedule();}});
 addEventListener('pagehide',()=>{releaseKey();releaseTrumpet();cancelAnimationFrame(frame);frame=0;bridge.dispose();journey.dispose();folio.dispose();film.dispose();});
-addEventListener('pageshow',event=>{if(event.persisted){folio=createScoreFolio(scoreAct);journey=createScoreJourney({music,scoreAct,demo});bridge=createProductBridge({product,bay,opening});film=createGameplayFilm(filmVideo,filmButton,{startTime:4.8});}hidden=document.hidden;layoutDirty=true;schedule();});
+addEventListener('pageshow',event=>{if(event.persisted){folio=createScoreFolio(scoreAct);journey=createScoreJourney({music,scoreAct,demo});bridge=createProductBridge({product,bay,opening});film=createGameplayFilm(filmVideo,filmButton,{startTime:3,resetOnDeactivate:false});}hidden=document.hidden;layoutDirty=true;schedule();});
 document.querySelector('.scroll-cue')?.addEventListener('click',event=>{if(still)return;event.preventDefault();scrollTo({top:metrics.opening.top+metrics.opening.range*.22,behavior:'smooth'});});
 schedule();

@@ -68,11 +68,11 @@ export function createProductBridge({product,bay,opening}){
   }
   function measure(){
     if(dead)return;
-    const viewportWidth=innerWidth,viewportHeight=scrollViewportHeight(innerWidth,innerHeight,opening.querySelector('.concerto-stage')?.clientHeight,!document.documentElement.classList.contains('concerto-still')),y=scrollY;
+    const viewportWidth=opening.querySelector('.concerto-stage')?.clientWidth||innerWidth,viewportHeight=scrollViewportHeight(innerWidth,innerHeight,opening.querySelector('.concerto-stage')?.clientHeight,!document.documentElement.classList.contains('concerto-still')),y=scrollY;
     const openingRect=opening.getBoundingClientRect(),bayRect=bay.getBoundingClientRect();
     const baseWidth=bayRect.width;
     if(!(baseWidth>0&&viewportHeight>0&&openingRect.height>0)){metrics=null;return;}
-    const startWidth=Math.min(viewportWidth*.90,Math.min(viewportHeight*.72,Math.max(160,viewportHeight-240))*32/27,1200);
+    const startWidth=Math.min(innerWidth*.90,Math.min(viewportHeight*.72,Math.max(160,viewportHeight-240))*32/27,1200);
     const baseHeight=baseWidth*27/32;
     const pinEnd=openingRect.top+y+Math.max(0,openingRect.height-viewportHeight);
     const targetTop=bayRect.top+y;

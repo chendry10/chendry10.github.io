@@ -96,5 +96,13 @@
     "source": "scripts/prepare-scroll-tier.py",
     "sourceSHA256": "276130ecc8c3f6a79c1b6b2a7daf932f52b27a9ad07db2ab9a52ad47c0daed20",
     "description": "1280 x 1120 Lanczos derivative of approved source WebP frames, WebP quality 95; original and compact tiers unchanged."
+  },
+  "monitorProjection": {
+    "source": "scripts/export-monitor-projection.py",
+    "sourceSHA256": "c05c052ff8cc64daf4e2848a8efd25b9e1e08a95d9e4b2a8a80cd762b5c2c09b",
+    "coordinates": "monitor-quads.js",
+    "coordinatesSHA256": "72d3ba51103b9ec354daf2bc1450d8f07a2efcfc0cfa1382495e33a56de4caf4",
+    "frames": 181,
+    "sceneSHA256": "613ce4f29ba267ed190af2f3621c85dd10e55782e5f570eacd266a17ff81330b"
   }
 }
