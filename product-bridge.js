@@ -71,13 +71,13 @@ export function createProductBridge({product,bay,opening}){
     const openingRect=opening.getBoundingClientRect(),bayRect=bay.getBoundingClientRect();
     const baseWidth=bayRect.width;
     if(!(baseWidth>0&&viewportHeight>0&&openingRect.height>0)){metrics=null;return;}
-    const startWidth=Math.min(viewportWidth*.78,viewportHeight*.55*1.6,960);
-    const baseHeight=baseWidth*9/16;
+    const startWidth=Math.min(viewportWidth*.90,Math.min(viewportHeight*.72,Math.max(160,viewportHeight-240))*32/27,1200);
+    const baseHeight=baseWidth*27/32;
     const pinEnd=openingRect.top+y+Math.max(0,openingRect.height-viewportHeight);
     const targetTop=bayRect.top+y;
     const travel=Math.max(viewportHeight*.55,targetTop-viewportHeight*.18-pinEnd);
     metrics={viewportWidth,viewportHeight,baseWidth,baseHeight,startWidth,
-      startLeft:(viewportWidth-startWidth)/2,startTop:viewportHeight*.53-baseHeight*(startWidth/baseWidth)/2,
+      startLeft:(viewportWidth-startWidth)/2,startTop:viewportHeight*.5+80-baseHeight*(startWidth/baseWidth)/2,
       targetLeft:bayRect.left,targetTop,pinEnd,travel,landingTop:targetTop-pinEnd-travel};
     if(mode==='portal')set(product,'width',`${baseWidth}px`);
   }

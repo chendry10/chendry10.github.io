@@ -1,7 +1,7 @@
 import {createScoreFolio} from './score-folio.js';
 import {createScoreJourney,scoreFolioProgress} from './score-journey.js?v=08156aa07626';
 import {createGameplayFilm} from './gameplay-film.js';
-import {createProductBridge} from './product-bridge.js';
+import {createProductBridge} from './product-bridge.js?v=56f1707e86cc';
 
 // One native, demand-driven scheduler owns all decorative poses.
 const root=document.documentElement;

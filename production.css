@@ -10,7 +10,7 @@
 .production-evidence{grid-column:1;grid-row:1/span 2}
 .production-responsibilities{grid-column:2;grid-row:2}
 .production-evidence,.production-responsibilities{min-width:0}
-.production-bay{position:relative;width:100%;aspect-ratio:16/9;padding-bottom:68px;box-sizing:content-box;min-width:0;isolation:isolate}
+.production-bay{position:relative;width:100%;aspect-ratio:32/27;padding-bottom:68px;box-sizing:content-box;min-width:0;isolation:isolate}
 .production-bay>.relay-product{position:relative;inset:auto;width:100%;height:100%;max-width:none;margin:0;display:grid;grid-template-rows:minmax(0,1fr) auto;gap:12px;transform:none;opacity:1;visibility:visible}
 .production-bay>.relay-product>.relay-product-shell{min-height:0;width:100%;height:100%;aspect-ratio:auto}
 .production-bay>.relay-product>figcaption{margin:0;line-height:1.45;gap:8px 16px}
@@ -56,7 +56,7 @@
   .production-heading h2{font-size:clamp(39px,10.5vw,52px)}
   .production-role{font-size:14px;padding:0}
   .production-grid{gap:48px}
-  .production-bay{aspect-ratio:16/9}
+  .production-bay{aspect-ratio:32/27}
   .production-bay>.relay-product{gap:12px}
   .production-bay>.relay-product>figcaption{justify-content:flex-start}
   .production-bay>.relay-product>figcaption strong{font-size:16px}

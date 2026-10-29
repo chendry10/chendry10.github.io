@@ -1,0 +1,101 @@
+{
+  "source": "Actual Typing Agent Blizzard Defense frontend, recorded locally with normal visible game controls and keyboard input.",
+  "sourcePath": "modules/student/views/blizzard-defense/index.html",
+  "sourceSha256": "28a7d8506acf722260ace3e7fd88813e4bc116887750f0804f3880856bd2084e",
+  "capture": {
+    "method": "User-approved Chrome tab MediaRecorder capture, VP9, with timestamped native keydown and keyup events. Only local canvas backing resolution and asset paths were adjusted; game rules and state were unchanged.",
+    "canvasPixels": [
+      2560,
+      1328
+    ],
+    "capturedStreamPixels": [
+      3840,
+      1990
+    ],
+    "note": "The browser scaled the tab capture; this is not native 4K gameplay. The delivered game region is 2560 by 1326. No game-state injection, synthetic gameplay, student data, audio or production connections.",
+    "durationSeconds": 7.6,
+    "sourceFramesInSelectedSegment": 455,
+    "maxSelectedCaptureGapMs": 39,
+    "gapsOver50ms": 0,
+    "outputFrames": 456,
+    "outputFPS": 60
+  },
+  "timing": {
+    "timeline": "typing-keyboard-timeline.json",
+    "sha256": "16482e67d8ca57d6e26b95730db9693a160e46faba86594abe7206abc3b7430f",
+    "characters": 19,
+    "meanIntervalMs": 400.1,
+    "minIntervalMs": 382.4,
+    "maxIntervalMs": 413.3,
+    "wpmFiveCharacters": 29.993,
+    "note": "Uniform 400 ms target. Game HUD uses its own rolling scoring metric and may differ. Key caps bottom out at the captured keydown, hold until keyup, then return over 135 ms. Both visuals share one encoded clock."
+  },
+  "render": {
+    "blender": "4.5.15",
+    "engine": "Cycles OPTIX",
+    "samples": 128,
+    "keyboardPixels": [
+      2400,
+      1000
+    ],
+    "keyTravelMm": 4,
+    "depthSteps": 16,
+    "uniquePoses": 145,
+    "minimumCapRimZmm": 6.1,
+    "plateZmm": 4.9,
+    "cad": "cherry-keycaps-source.json",
+    "license": "cherry-keycaps-MIT-LICENSE.txt",
+    "lighting": "Poly Haven studio_small_09, CC0, Sergej Majboroda; authored area lights.",
+    "localOnly": "Raw gameplay, full input capture, CAD, HDRI and Blender scene stay outside the published repository."
+  },
+  "sources": [
+    {
+      "file": "scripts/build-typing-keyboard.py",
+      "sha256": "4f1162598612cc1611f5eab2846088802f311c2f086abc70ef716df20a1cb3fa"
+    },
+    {
+      "file": "scripts/render-typing-keyboard.py",
+      "sha256": "9d74147c9cfed926ae72294027cef1aa2aefebee6e7effab58542022ca11daba"
+    },
+    {
+      "file": "scripts/compose-typing-keyboard.py",
+      "sha256": "2a1e8944f151a46c39c7bf6c548e9a5877850b663bb165a1638fac833857daa4"
+    }
+  ],
+  "assets": [
+    {
+      "file": "blizzard-keyboard.mp4",
+      "bytes": 2696076,
+      "sha256": "10ebcea6595dfe5cf9621fed021801f1d0c7277d0fe8cadf81764d238ced73fa",
+      "width": 2560,
+      "height": 2160,
+      "r_frame_rate": "60/1",
+      "nb_frames": "456"
+    },
+    {
+      "file": "blizzard-keyboard-1280.mp4",
+      "bytes": 868134,
+      "sha256": "0e5d98f2a986e240d853b61c32bb154d39e645f34a79960bcf7233e426a1049d",
+      "width": 1280,
+      "height": 1080,
+      "r_frame_rate": "60/1",
+      "nb_frames": "456"
+    },
+    {
+      "file": "blizzard-keyboard-poster.webp",
+      "bytes": 141168,
+      "sha256": "9eca254ad59875716346cc12b1cb2e9660ca1caa3d3c2d70a688ed0208d58a58",
+      "width": 2560,
+      "height": 2160,
+      "r_frame_rate": "25/1"
+    },
+    {
+      "file": "blizzard-keyboard-poster-1280.webp",
+      "bytes": 52208,
+      "sha256": "6571b5844183c6984e8aea8e09d86f909b006e88755d257443393ed061d6fbaf",
+      "width": 1280,
+      "height": 1080,
+      "r_frame_rate": "25/1"
+    }
+  ]
+}
