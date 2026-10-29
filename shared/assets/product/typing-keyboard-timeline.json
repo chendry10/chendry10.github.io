@@ -1,0 +1,246 @@
+{
+  "durationSeconds": 7.6,
+  "fps": 60,
+  "events": [
+    {
+      "type": "keydown",
+      "key": "t",
+      "code": "KeyT",
+      "at": -284.0
+    },
+    {
+      "type": "keyup",
+      "key": "t",
+      "code": "KeyT",
+      "at": -209.0
+    },
+    {
+      "type": "keydown",
+      "key": "h",
+      "code": "KeyH",
+      "at": 119.0
+    },
+    {
+      "type": "keyup",
+      "key": "h",
+      "code": "KeyH",
+      "at": 192.2
+    },
+    {
+      "type": "keydown",
+      "key": "e",
+      "code": "KeyE",
+      "at": 532.3
+    },
+    {
+      "type": "keyup",
+      "key": "e",
+      "code": "KeyE",
+      "at": 610.5
+    },
+    {
+      "type": "keydown",
+      "key": "l",
+      "code": "KeyL",
+      "at": 914.7
+    },
+    {
+      "type": "keyup",
+      "key": "l",
+      "code": "KeyL",
+      "at": 989.4
+    },
+    {
+      "type": "keydown",
+      "key": "d",
+      "code": "KeyD",
+      "at": 1324.2
+    },
+    {
+      "type": "keyup",
+      "key": "d",
+      "code": "KeyD",
+      "at": 1393.3
+    },
+    {
+      "type": "keydown",
+      "key": "s",
+      "code": "KeyS",
+      "at": 1713.9
+    },
+    {
+      "type": "keyup",
+      "key": "s",
+      "code": "KeyS",
+      "at": 1784.5
+    },
+    {
+      "type": "keydown",
+      "key": "t",
+      "code": "KeyT",
+      "at": 2121.2
+    },
+    {
+      "type": "keyup",
+      "key": "t",
+      "code": "KeyT",
+      "at": 2204.0
+    },
+    {
+      "type": "keydown",
+      "key": "a",
+      "code": "KeyA",
+      "at": 2524.2
+    },
+    {
+      "type": "keyup",
+      "key": "a",
+      "code": "KeyA",
+      "at": 2607.5
+    },
+    {
+      "type": "keydown",
+      "key": "y",
+      "code": "KeyY",
+      "at": 2921.2
+    },
+    {
+      "type": "keyup",
+      "key": "y",
+      "code": "KeyY",
+      "at": 2998.5
+    },
+    {
+      "type": "keydown",
+      "key": "b",
+      "code": "KeyB",
+      "at": 3323.2
+    },
+    {
+      "type": "keyup",
+      "key": "b",
+      "code": "KeyB",
+      "at": 3403.8
+    },
+    {
+      "type": "keydown",
+      "key": "o",
+      "code": "KeyO",
+      "at": 3721.1
+    },
+    {
+      "type": "keyup",
+      "key": "o",
+      "code": "KeyO",
+      "at": 3791.3
+    },
+    {
+      "type": "keydown",
+      "key": "w",
+      "code": "KeyW",
+      "at": 4130.0
+    },
+    {
+      "type": "keyup",
+      "key": "w",
+      "code": "KeyW",
+      "at": 4212.6
+    },
+    {
+      "type": "keydown",
+      "key": "l",
+      "code": "KeyL",
+      "at": 4521.3
+    },
+    {
+      "type": "keyup",
+      "key": "l",
+      "code": "KeyL",
+      "at": 4602.5
+    },
+    {
+      "type": "keydown",
+      "key": "h",
+      "code": "KeyH",
+      "at": 4921.2
+    },
+    {
+      "type": "keyup",
+      "key": "h",
+      "code": "KeyH",
+      "at": 4996.2
+    },
+    {
+      "type": "keydown",
+      "key": "a",
+      "code": "KeyA",
+      "at": 5324.9
+    },
+    {
+      "type": "keyup",
+      "key": "a",
+      "code": "KeyA",
+      "at": 5399.8
+    },
+    {
+      "type": "keydown",
+      "key": "r",
+      "code": "KeyR",
+      "at": 5721.6
+    },
+    {
+      "type": "keyup",
+      "key": "r",
+      "code": "KeyR",
+      "at": 5807.6
+    },
+    {
+      "type": "keydown",
+      "key": "p",
+      "code": "KeyP",
+      "at": 6131.2
+    },
+    {
+      "type": "keyup",
+      "key": "p",
+      "code": "KeyP",
+      "at": 6201.1
+    },
+    {
+      "type": "keydown",
+      "key": "w",
+      "code": "KeyW",
+      "at": 6529.3
+    },
+    {
+      "type": "keyup",
+      "key": "w",
+      "code": "KeyW",
+      "at": 6606.9
+    },
+    {
+      "type": "keydown",
+      "key": "i",
+      "code": "KeyI",
+      "at": 6926.8
+    },
+    {
+      "type": "keyup",
+      "key": "i",
+      "code": "KeyI",
+      "at": 6996.7
+    },
+    {
+      "type": "keydown",
+      "key": "n",
+      "code": "KeyN",
+      "at": 7320.8
+    },
+    {
+      "type": "keyup",
+      "key": "n",
+      "code": "KeyN",
+      "at": 7404.2
+    }
+  ]
+}

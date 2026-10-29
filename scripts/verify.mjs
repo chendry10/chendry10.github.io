@@ -67,6 +67,25 @@ for(const file of files){
 }
 const media=JSON.parse(fs.readFileSync(path.join(root,'shared/assets/product/blizzard-recording-provenance.json')));
 for(const asset of media.assets)check(hash(fs.readFileSync(path.join(root,'shared/assets/product',asset.file)))===asset.sha256,`Genuine recording ${asset.file}`);
+const typing=JSON.parse(fs.readFileSync(path.join(root,'shared/assets/product/typing-keyboard-provenance.json')));
+const typingRoot=path.join(root,'shared/assets/product');
+for(const asset of typing.assets){
+  const bytes=fs.readFileSync(path.join(typingRoot,asset.file));
+  check(hash(bytes)===asset.sha256&&bytes.length===asset.bytes,`Synchronized film integrity ${asset.file}`);
+  if(asset.file.endsWith('.webp'))check(webpSize(bytes)?.join('x')===`${asset.width}x${asset.height}`,`Synchronized poster dimensions ${asset.file}`);
+  else check(asset.r_frame_rate==='60/1'&&Number(asset.nb_frames)===456&&bytes.length<4*1024*1024,`Bounded 60 fps film ${asset.file}`);
+}
+for(const source of typing.sources)check(hash(fs.readFileSync(path.join(root,source.file),'utf8').replaceAll('\r\n','\n'))===source.sha256,`Typing production source ${source.file}`);
+const typingBytes=fs.readFileSync(path.join(typingRoot,typing.timing.timeline));
+check(hash(typingBytes)===typing.timing.sha256,'Captured key timeline integrity');
+const typingTimeline=JSON.parse(typingBytes),downs=typingTimeline.events.filter(e=>e.type==='keydown'&&e.at>=0);
+const gaps=downs.slice(1).map((e,i)=>e.at-downs[i].at);
+check(downs.length===19&&Math.abs(gaps.reduce((a,b)=>a+b,0)/gaps.length-400)<1&&gaps.every(g=>g>=380&&g<=420),'Captured typing maintains 30 WPM without bursts');
+check(typingTimeline.events.every(e=>['keydown','keyup'].includes(e.type)&&/^[a-z]$/.test(e.key)&&Number.isFinite(e.at)),'Published timeline contains only game key timing');
+check(downs.every(e=>typingTimeline.events.some(up=>up.type==='keyup'&&up.key===e.key&&up.at>e.at&&up.at-e.at<150)),'Every key has a captured release');
+check(html.includes('blizzard-keyboard.mp4')&&html.includes('blizzard-keyboard-1280.mp4'),'Both synchronized movie tiers are wired into the site');
+check(fs.readFileSync(path.join(root,'motion.js'),'utf8').includes(`from './product-bridge.js?v=${moduleVersion('product-bridge.js')}'`),'Updated product bridge is cache-versioned');
+for(const css of ['story.css','production.css'])check(html.includes(`${css}?v=${moduleVersion(css)}`),`Updated layout is cache-versioned: ${css}`);
 const photos=JSON.parse(fs.readFileSync(path.join(root,'shared/assets/photography/provenance.json')));
 for(const asset of photos.assets)check(hash(fs.readFileSync(path.join(root,'shared/assets/photography',asset.file)))===asset.sha256,`Licensed photo ${asset.file}`);
 const scores=JSON.parse(fs.readFileSync(path.join(root,'shared/assets/lyrelink/manifest.json')));
