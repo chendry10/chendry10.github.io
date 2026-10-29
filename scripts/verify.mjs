@@ -180,6 +180,9 @@ check(projection.keyboardFrameMargin>.02,'Final keyboard stays inside the frame'
 for(const asset of inputNotice.handoff.posters){const bytes=fs.readFileSync(path.join(inputRoot,asset.file));check(hash(bytes)===asset.sha256&&bytes.length===asset.bytes,'Matching gameplay handoff poster integrity');}
 for(const file of ['input-handoff.js','gameplay-film.js'])check(fs.readFileSync(path.join(root,'motion.js'),'utf8').includes(`from './${file}?v=${moduleVersion(file)}'`),'Handoff module cache version');
 check(html.includes(`./keystroke.css?v=${moduleVersion('keystroke.css')}`),'Opening style cache version');
+check(html.includes(`./mobile-motion.css?v=${moduleVersion('mobile-motion.css')}`),'Mobile style cache version');
+for(const file of ['scroll-viewport.js','product-bridge.js'])check(fs.readFileSync(path.join(root,'motion.js'),'utf8').includes(`from './${file}?v=${moduleVersion(file)}'`),'Mobile layout module cache version');
+check(fs.readFileSync(path.join(root,'product-bridge.js'),'utf8').includes(`from './scroll-viewport.js?v=${moduleVersion('scroll-viewport.js')}'`),'Bridge viewport cache version');
 const trumpetRoot=path.join(root,'shared/assets/product/trumpet-sequence');
 const trumpet=JSON.parse(fs.readFileSync(path.join(trumpetRoot,'manifest.json')));
 const trumpetNotice=JSON.parse(fs.readFileSync(path.join(trumpetRoot,'provenance.json')));

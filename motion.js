@@ -1,14 +1,16 @@
+import {scrollViewportHeight,scrollLayoutChanged} from './scroll-viewport.js?v=ac31df9665ba';
 import {createScoreFolio} from './score-folio.js';
 import {createScoreJourney,scoreFolioProgress,scoreRevealPose} from './score-journey.js?v=434bb2ff8d46';
 import {createGameplayFilm} from './gameplay-film.js?v=a71be8c3dbb1';
 import {screenHandoffMatrix} from './input-handoff.js?v=a9845ab20e0d';
-import {createProductBridge} from './product-bridge.js?v=56f1707e86cc';
+import {createProductBridge} from './product-bridge.js?v=e9ead324933b';
 
 // One native, demand-driven scheduler owns all decorative poses.
 const root=document.documentElement;
 const opening=document.querySelector('.concerto-opening');
 const relay=document.querySelector('.relay-scene');
 const hero=document.querySelector('.hero-identity');
+const openingStage=opening.querySelector('.concerto-stage');
 const identity=[...document.querySelectorAll('.hero-identity,.hero-caption,.scroll-cue')];
 const keyHost=document.querySelector('.relay-key');
 const heading=document.querySelector('.relay-heading');
@@ -41,12 +43,15 @@ let metrics={},width=innerWidth,height=innerHeight,still=true,layoutDirty=true;
 let frame=0,lastTime=0,poses=null,hidden=document.hidden,renderCount=0;
 let key=null,keyAbort=null,keyTicket=0,keyLoading=false,keyLatest=0,idle=0;
 let trumpet=null,trumpetAbort=null,trumpetTicket=0,trumpetLoading=false;
-const quiet=()=>root.classList.contains('motion-off')||osReduced.matches||innerWidth<=900;
+const quiet=()=>root.classList.contains('motion-off')||osReduced.matches;
 function schedule(){if(!hidden&&!frame)frame=requestAnimationFrame(render);}
 function measure(){
-  width=innerWidth;height=innerHeight;still=quiet();
+  width=innerWidth;still=quiet();
   root.classList.toggle('concerto-motion',!still);
   root.classList.toggle('concerto-still',still);
+  // Resolve stacked score geometry before caching chapter boundaries.
+  scoreAct.classList.toggle('folio-still',still||width<=900);
+  height=scrollViewportHeight(width,innerHeight,openingStage.clientHeight,!still);
   data(root,'scrollEngine',still?'off':'concerto-native');
   const y=scrollY;
   const bounds=[opening,music,scoreAct].map(el=>{const r=el.getBoundingClientRect();return {top:r.top+y,height:r.height,range:Math.max(1,r.height-height)};});
@@ -60,7 +65,7 @@ function releaseKey(){
 function warmKey(){
   if(still||hidden||key||keyLoading)return;
   keyLoading=true;const ticket=++keyTicket;keyAbort=new AbortController();const signal=keyAbort.signal;
-  import('./switch-scene.js?v=7de696442440').then(({createSwitchScene})=>createSwitchScene(keyHost,{signal,study:'keystroke'})).then(controller=>{
+  import('./switch-scene.js?v=b63883f50615').then(({createSwitchScene})=>createSwitchScene(keyHost,{signal,study:'keystroke'})).then(controller=>{
     if(signal.aborted||ticket!==keyTicket||quiet()){controller.dispose();return;}
     key=controller;keyLoading=false;controller.setProgress(keyLatest);schedule();
   }).catch(()=>{if(ticket===keyTicket){keyLoading=false;data(keyHost,'switchState','fallback');}});
@@ -69,7 +74,7 @@ function releaseTrumpet(){trumpetTicket++;trumpetAbort?.abort();trumpetAbort=nul
 function warmTrumpet(){
   if(still||hidden||trumpet||trumpetLoading)return;
   trumpetLoading=true;const ticket=++trumpetTicket;trumpetAbort=new AbortController();const signal=trumpetAbort.signal;
-  import('./switch-scene.js?v=7de696442440').then(({createSwitchScene})=>createSwitchScene(trumpetHost,{signal,study:'trumpet'})).then(controller=>{
+  import('./switch-scene.js?v=b63883f50615').then(({createSwitchScene})=>createSwitchScene(trumpetHost,{signal,study:'trumpet'})).then(controller=>{
     if(signal.aborted||ticket!==trumpetTicket||quiet()){controller.dispose();return;}
     trumpet=controller;trumpetLoading=false;controller.setProgress(poses?.music||0);schedule();
   }).catch(()=>{if(ticket===trumpetTicket){trumpetLoading=false;data(trumpetHost,'switchState','fallback');}});
@@ -117,7 +122,7 @@ function render(now){
     style(heading,'opacity',(titleIn*(1-titleOut)).toFixed(4));
     style(heading,'transform',`translate3d(0,${((1-titleIn)*22-titleOut*30).toFixed(2)}px,0)`);
     const arrival=ease(part(p,.68,.84));
-    const introScale=1+.25*(1-ease(part(p,.08,.22)));
+    const introScale=1+(width<=900?.08:.25)*(1-ease(part(p,.08,.22)));
     style(keyHost,'opacity',(1-ease(part(arrival,.03,.35))).toFixed(4));
     style(keyHost,'transform',`scale(${introScale.toFixed(4)})`);
     if(!ownsProduct){
@@ -142,8 +147,8 @@ function render(now){
   }
   if(!still&&y>=metrics.opening.top+metrics.opening.height+height&&y+height*2>metrics.music.top&&y<metrics.music.top+metrics.music.height+height){releaseKey();warmTrumpet();}
   else releaseTrumpet();
-  if(near(metrics.scores,y)||still)folio.render(poses.scores,still);
-  journey.render(y,still,poses.scores);
+  if(near(metrics.scores,y)||still)folio.render(poses.scores,still||width<=900);
+  journey.render(y,still||width<=900,poses.scores);
   if(!still&&near(metrics.opening,y)&&p>.52)film.prepare();
   film.setActive(!root.classList.contains('motion-off')&&!osReduced.matches&&(still||p>=.84));
   if(!still&&y<metrics.opening.top+metrics.opening.height+height)prewarm();
@@ -154,7 +159,10 @@ function render(now){
 const revealObserver=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){entry.target.classList.add('is-visible');revealObserver.unobserve(entry.target);}},{rootMargin:'0px 0px -30px',threshold:.08});
 document.querySelectorAll('[data-sc-in],.production-responsibilities>article,.background-heading,.demo-intro').forEach(el=>{el.classList.add('concerto-reveal');revealObserver.observe(el);});
 addEventListener('scroll',schedule,{passive:true});
-addEventListener('resize',()=>{layoutDirty=true;schedule();},{passive:true});
+addEventListener('resize',()=>{
+  const next={width:innerWidth,height:scrollViewportHeight(innerWidth,innerHeight,openingStage.clientHeight,!quiet())};
+  if(scrollLayoutChanged({width,height},next)){layoutDirty=true;schedule();}
+},{passive:true});
 document.addEventListener('portfolio:motion',()=>{if(quiet()){releaseKey();releaseTrumpet();}layoutDirty=true;schedule();});
 for(const name of ['portfolio:journey-layout','portfolio:product-layout'])document.addEventListener(name,()=>{layoutDirty=true;schedule();});
 osReduced.addEventListener('change',()=>{layoutDirty=true;schedule();});

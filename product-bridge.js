@@ -1,3 +1,4 @@
+import {scrollViewportHeight} from './scroll-viewport.js?v=ac31df9665ba';
 /** Carry the genuine gameplay figure into its reading position; never clone it. */
 export function createProductBridge({product,bay,opening}){
   if(!product||!bay||!opening)return {measure(){},render(){return false;},dispose(){}};
@@ -67,7 +68,7 @@ export function createProductBridge({product,bay,opening}){
   }
   function measure(){
     if(dead)return;
-    const viewportWidth=innerWidth,viewportHeight=innerHeight,y=scrollY;
+    const viewportWidth=innerWidth,viewportHeight=scrollViewportHeight(innerWidth,innerHeight,opening.querySelector('.concerto-stage')?.clientHeight,!document.documentElement.classList.contains('concerto-still')),y=scrollY;
     const openingRect=opening.getBoundingClientRect(),bayRect=bay.getBoundingClientRect();
     const baseWidth=bayRect.width;
     if(!(baseWidth>0&&viewportHeight>0&&openingRect.height>0)){metrics=null;return;}
