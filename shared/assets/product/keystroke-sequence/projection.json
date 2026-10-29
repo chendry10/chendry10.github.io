@@ -1,0 +1,55 @@
+{
+  "sourceAspect": [
+    2560,
+    1326
+  ],
+  "sequenceAspect": [
+    1600,
+    1400
+  ],
+  "screenQuad": [
+    [
+      0.23708957433700562,
+      0.20488518476486206
+    ],
+    [
+      0.8190798759460449,
+      0.21491920948028564
+    ],
+    [
+      0.8005638122558594,
+      0.5568128824234009
+    ],
+    [
+      0.251465380191803,
+      0.5275896489620209
+    ]
+  ],
+  "contacts": [
+    {
+      "key": "b",
+      "scrollProgress": 0.24927999997138978,
+      "sourceSeconds": 3.3231999999284745,
+      "travelMm": 4
+    },
+    {
+      "key": "o",
+      "scrollProgress": 0.4084400000095367,
+      "sourceSeconds": 3.7211000000238417,
+      "travelMm": 4
+    },
+    {
+      "key": "w",
+      "scrollProgress": 0.5719999999999998,
+      "sourceSeconds": 4.13,
+      "travelMm": 4
+    },
+    {
+      "key": "l",
+      "scrollProgress": 0.7285199999809265,
+      "sourceSeconds": 4.5212999999523165,
+      "travelMm": 4
+    }
+  ],
+  "keyboardFrameMargin": 0.08514628559350967
+}

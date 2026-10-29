@@ -8,10 +8,10 @@ const motion=fs.readFileSync('motion.js','utf8');
 const poseSource=motion.match(/function inputPose\(p\)\{[\s\S]*?\n\}/)?.[0];
 assert.ok(poseSource,'Opening pose mapping is present');
 const inputPose=vm.runInNewContext(`const clamp=n=>Math.max(0,Math.min(1,n));const part=(p,a,b)=>clamp((p-a)/(b-a));const ease=t=>t*t*(3-2*t);const mix=(a,b,t)=>a+(b-a)*t;${poseSource};inputPose`);
-assert.equal(inputPose(.05),0,'CPU starts closed');
-assert.equal(inputPose(.65),1,'CPU fully opens before the gameplay handoff');
-assert.ok(Math.abs(inputPose(.35)-.5)<1e-9,'Layer reveal uses the full scroll interval');
-assert.equal(inputPose(.84),1,'CPU holds its final pose through the handoff');
+assert.equal(inputPose(.05),0,'Keystroke story starts at its first pose');
+assert.equal(inputPose(.65),1,'Keystroke story completes before the gameplay handoff');
+assert.ok(Math.abs(inputPose(.35)-.5)<1e-9,'Input story uses the full scroll interval');
+assert.equal(inputPose(.84),1,'Input story holds its final pose through the handoff');
 for(const p of[.05,.65])assert.ok(Math.abs(inputPose(p-1e-8)-inputPose(p+1e-8))<.00001,'Pose mapping remains continuous');
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
 async function fixture({code=source,latency=70,decodeLatency=25,width=760,height=665,change,saveData=false,failFirst=false,study='processor'}={}){
@@ -63,7 +63,7 @@ async function fixture({code=source,latency=70,decodeLatency=25,width=760,height
     while(true){events.sort((a,b)=>a.at-b.at);if(!events.length||events[0].at>end)break;if(++count>100000)throw Error('Runaway decode queue');const event=events.shift();now=event.at;event.run();await flush();}
     now=end;await flush();
   }
-  async function move(index){api.setProgress(index/120);await advance(1000/60);samples.push({target:index,shown:Number(host.dataset.switchFrame),time:now});}
+  async function move(index){api.setProgress(index/(manifest.frameCount-1));await advance(1000/60);samples.push({target:index,shown:Number(host.dataset.switchFrame),time:now});}
   return{host,api,abort,doc,reduced,requests,bitmaps,draws,samples,advance,move,resize(w,h){width=w;height=h;observer.observe();},stats:()=>({now,fetches,decoders,maxFetches,maxDecoders,cancelled})};
 }
 
@@ -152,3 +152,7 @@ const wrongStudy=await fixture({study:'trumpet'});assert.equal(wrongStudy.host.d
 await assert.rejects(()=>fixture({study:'https://untrusted.invalid/manifest.json'}),/Unknown authored study/);
 if(process.argv[2])report.before=await benchmark(fs.readFileSync(process.argv[2],'utf8'));
 console.log(JSON.stringify(report,null,2));
+
+const typingScene=await fixture({study:'keystroke',change:m=>{m.width=1600;m.height=1400;m.frameCount=181;m.frames=Array.from({length:181},(_,index)=>({index,file:`key-${String(index).padStart(3,'0')}.webp`,progress:index/180,width:1600,height:1400,bytes:65000,sha256:index.toString(16).padStart(64,'0')}));}});
+await typingScene.advance(5000);for(const index of [0,50,150,25,180]){await typingScene.move(index);await typingScene.advance(400);assert.equal(typingScene.draws.at(-1).index,index);}
+assert.ok(Number(typingScene.host.dataset.switchBitmapBytes)<=48*1024*1024);typingScene.api.dispose();await typingScene.advance(500);assert.ok(typingScene.bitmaps.every(b=>b.closed));

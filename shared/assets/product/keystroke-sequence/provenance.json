@@ -1,0 +1,95 @@
+{
+  "title": "From input to play",
+  "source": "scripts/render-keystroke-story.py",
+  "sourceSHA256": "cc60059f59f625bbc7d60795348244f7b54522c4e76354b97833517fb319ad2e",
+  "render": {
+    "engine": "Blender 4.5 Cycles OPTIX",
+    "samples": 256,
+    "heroSamples": 512,
+    "frames": 181,
+    "width": 1600,
+    "height": 1400
+  },
+  "manifestSHA256": "6878662db5f9c7d75c009a6c2df14d9577cb447c17714cb7334562dceb37d5f3",
+  "sequenceBytes": 16196548,
+  "hero": [
+    {
+      "file": "hero.webp",
+      "width": 2560,
+      "height": 2240,
+      "bytes": 110674,
+      "sha256": "6359d68265bf95e983728a03017aaaffc50f7d1918160784684bf7b3fdb81530"
+    },
+    {
+      "file": "hero-1280.webp",
+      "width": 1280,
+      "height": 1120,
+      "bytes": 47850,
+      "sha256": "d3e75db805fdbb6fa0a92ed12292c5fe9ed84cff4a908001cad5775b20b2b4e9"
+    },
+    {
+      "file": "hero-960.webp",
+      "width": 960,
+      "height": 840,
+      "bytes": 35968,
+      "sha256": "541fc8174e52e5d652e903a6b462ae174b2f6654b577b2b520cd996cb507c0bf"
+    }
+  ],
+  "keyboard": {
+    "source": "scripts/build-typing-keyboard.py",
+    "cadNotice": "../cherry-keycaps-source.json",
+    "license": "MIT",
+    "changes": "Ivory and slate PBT, a satin bronze focal key, new camera path and photographic lighting."
+  },
+  "gameplay": {
+    "source": "../typing-keyboard-provenance.json",
+    "clipStartSeconds": 3,
+    "clipEndSeconds": 4.8,
+    "originalDimensions": [
+      2560,
+      1326
+    ],
+    "keys": [
+      {
+        "key": "b",
+        "seconds": 3.3231999999284745
+      },
+      {
+        "key": "o",
+        "seconds": 3.7211000000238417
+      },
+      {
+        "key": "w",
+        "seconds": 4.13
+      },
+      {
+        "key": "l",
+        "seconds": 4.5212999999523165
+      }
+    ],
+    "timing": "Recorded keydown contacts and screen frames share the same source time. Scroll controls playback. Cable glow is illustrative."
+  },
+  "lighting": {
+    "source": "https://polyhaven.com/a/studio_small_09",
+    "license": "CC0"
+  },
+  "projection": {
+    "file": "projection.json",
+    "sha256": "6c5c5e74607a73d383cc2fdcdc5c327ba39b6c949e1510c46253367a2b0062ad"
+  },
+  "handoff": {
+    "seconds": 4.8,
+    "posters": [
+      {
+        "file": "gameplay-handoff.webp",
+        "sha256": "cf9d38e1c892fe91411497e8c0ffc31d52b5dfec4f9b543fcd96dec7a7079790",
+        "bytes": 137404
+      },
+      {
+        "file": "gameplay-handoff-1280.webp",
+        "sha256": "3e880d5934e985b5a755b6075c6ed2ac15cb119a6116ae0023765d0e6d90f71c",
+        "bytes": 55814
+      }
+    ]
+  }
+}

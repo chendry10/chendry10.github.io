@@ -1,5 +1,5 @@
 /**
- * A Blender-rendered processor study. Native scrolling owns time and progress;
+ * Blender-rendered product studies. Native scrolling owns time and progress;
  * compressed images warm ahead of scrolling; a bounded moving decode window
  * paints complete frames without putting network round trips in the scroll path.
  * No decoder seek loop, WebGL context, wheel interception or animation loop.
@@ -17,9 +17,9 @@ const TIERS=[640,960,1280,1600];
 const clamp=value=>Math.max(0,Math.min(1,Number.isFinite(value)?value:0));
 
 export async function createSwitchScene(host,{signal,study='processor'}={}){
-  if(!['processor','trumpet'].includes(study))throw new TypeError('Unknown authored study.');
-  const sequenceURL=study==='trumpet'?new URL('./shared/assets/product/trumpet-sequence/manifest.json',import.meta.url):MANIFEST_URL;
-  const dimensions=study==='trumpet'?[1920,1080,960,540]:[1280,1120,960,840];
+  if(!['processor','trumpet','keystroke'].includes(study))throw new TypeError('Unknown authored study.');
+  const sequenceURL=study==='trumpet'?new URL('./shared/assets/product/trumpet-sequence/manifest.json',import.meta.url):study==='keystroke'?new URL('./shared/assets/product/keystroke-sequence/manifest.json',import.meta.url):MANIFEST_URL;
+  const dimensions=study==='trumpet'?[1920,1080,960,540]:study==='keystroke'?[1600,1400,960,840]:[1280,1120,960,840];
   if(!(host instanceof Element))throw new TypeError('A sized switch host is required.');
   scenes.get(host)?.dispose();
   const canvas=document.createElement('canvas');
@@ -64,7 +64,8 @@ export async function createSwitchScene(host,{signal,study='processor'}={}){
   function canvasSize(){
     if(dead||!context||width<2||height<2)return false;
     if(!sizeDirty)return true;
-    const ratio=Math.min(devicePixelRatio||1,1.5);
+    // The enlarged keyboard opening needs enough pixels for its 1.25x intro pose.
+    const ratio=study==='keystroke'?1.5:Math.min(devicePixelRatio||1,1.5);
     const scale=Math.min(1,Math.sqrt(MAX_CANVAS_PIXELS/(width*height*ratio*ratio)));
     const w=Math.max(1,Math.floor(width*ratio*scale)),h=Math.max(1,Math.floor(height*ratio*scale));
     if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}

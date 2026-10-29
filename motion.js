@@ -1,6 +1,7 @@
 import {createScoreFolio} from './score-folio.js';
 import {createScoreJourney,scoreFolioProgress,scoreRevealPose} from './score-journey.js?v=434bb2ff8d46';
-import {createGameplayFilm} from './gameplay-film.js';
+import {createGameplayFilm} from './gameplay-film.js?v=a71be8c3dbb1';
+import {screenHandoffMatrix} from './input-handoff.js?v=a9845ab20e0d';
 import {createProductBridge} from './product-bridge.js?v=56f1707e86cc';
 
 // One native, demand-driven scheduler owns all decorative poses.
@@ -14,6 +15,7 @@ const heading=document.querySelector('.relay-heading');
 const responseHeading=document.querySelector('.relay-response-heading');
 const product=document.querySelector('.relay-product');
 const bay=document.querySelector('[data-product-bay]');
+const productShell=product.querySelector('.relay-product-shell');
 const phases=[...document.querySelectorAll('[data-relay-step]')];
 const phaseGuide=document.querySelector('.relay-phase');
 const disclosure=document.querySelector('.relay-disclosure');
@@ -27,7 +29,7 @@ let journey=createScoreJourney({music,scoreAct,demo});
 let bridge=createProductBridge({product,bay,opening});
 const filmVideo=product.querySelector('[data-gameplay-video]');
 const filmButton=product.querySelector('[data-film-toggle]');
-let film=createGameplayFilm(filmVideo,filmButton);
+let film=createGameplayFilm(filmVideo,filmButton,{startTime:4.8});
 const osReduced=matchMedia('(prefers-reduced-motion:reduce)');
 const clamp=n=>Math.max(0,Math.min(1,n));
 const part=(p,a,b)=>clamp((p-a)/(b-a));
@@ -48,7 +50,7 @@ function measure(){
   data(root,'scrollEngine',still?'off':'concerto-native');
   const y=scrollY;
   const bounds=[opening,music,scoreAct].map(el=>{const r=el.getBoundingClientRect();return {top:r.top+y,height:r.height,range:Math.max(1,r.height-height)};});
-  metrics={opening:bounds[0],music:bounds[1],scores:bounds[2]};
+  metrics={opening:bounds[0],music:bounds[1],scores:bounds[2],keyBox:{x:keyHost.offsetLeft,y:keyHost.offsetTop,w:keyHost.offsetWidth,h:keyHost.offsetHeight},productWidth:Math.min(width*.90,Math.min(height*.72,Math.max(160,height-240))*32/27,1200)};
   folio.measure();journey.measure();bridge.measure();key?.resize();trumpet?.resize();layoutDirty=false;poses=null;
 }
 function releaseKey(){
@@ -58,7 +60,7 @@ function releaseKey(){
 function warmKey(){
   if(still||hidden||key||keyLoading)return;
   keyLoading=true;const ticket=++keyTicket;keyAbort=new AbortController();const signal=keyAbort.signal;
-  import('./switch-scene.js?v=99486a387d08').then(({createSwitchScene})=>createSwitchScene(keyHost,{signal})).then(controller=>{
+  import('./switch-scene.js?v=7de696442440').then(({createSwitchScene})=>createSwitchScene(keyHost,{signal,study:'keystroke'})).then(controller=>{
     if(signal.aborted||ticket!==keyTicket||quiet()){controller.dispose();return;}
     key=controller;keyLoading=false;controller.setProgress(keyLatest);schedule();
   }).catch(()=>{if(ticket===keyTicket){keyLoading=false;data(keyHost,'switchState','fallback');}});
@@ -67,7 +69,7 @@ function releaseTrumpet(){trumpetTicket++;trumpetAbort?.abort();trumpetAbort=nul
 function warmTrumpet(){
   if(still||hidden||trumpet||trumpetLoading)return;
   trumpetLoading=true;const ticket=++trumpetTicket;trumpetAbort=new AbortController();const signal=trumpetAbort.signal;
-  import('./switch-scene.js?v=99486a387d08').then(({createSwitchScene})=>createSwitchScene(trumpetHost,{signal,study:'trumpet'})).then(controller=>{
+  import('./switch-scene.js?v=7de696442440').then(({createSwitchScene})=>createSwitchScene(trumpetHost,{signal,study:'trumpet'})).then(controller=>{
     if(signal.aborted||ticket!==trumpetTicket||quiet()){controller.dispose();return;}
     trumpet=controller;trumpetLoading=false;controller.setProgress(poses?.music||0);schedule();
   }).catch(()=>{if(ticket===trumpetTicket){trumpetLoading=false;data(trumpetHost,'switchState','fallback');}});
@@ -83,8 +85,8 @@ function targetPose(y){
 }
 function near(m,y){return y+height*1.25>m.top&&y-height*.25<m.top+m.height;}
 function inputPose(p){
-  // Unfold the complete CPU before the actual game arrives, then hold the
-  // expanded pose through the handoff. Native scrolling still owns time.
+  // Follow the recorded keystrokes into their real game response, then hold
+  // the completed scene through the handoff. Native scrolling owns time.
   return ease(part(p,.05,.65));
 }
 function render(now){
@@ -100,6 +102,7 @@ function render(now){
     if(Math.abs(target[name]-poses[name])>.00015)settling=true;
   }
   const p=poses.opening,ownsProduct=bridge.render(y,still,p);
+  if(ownsProduct)style(productShell,'clipPath','none');
   if(near(metrics.opening,y)||still){
     keyLatest=inputPose(p);
     style(relay,'visibility','visible');style(relay,'opacity','1');
@@ -114,11 +117,14 @@ function render(now){
     style(heading,'opacity',(titleIn*(1-titleOut)).toFixed(4));
     style(heading,'transform',`translate3d(0,${((1-titleIn)*22-titleOut*30).toFixed(2)}px,0)`);
     const arrival=ease(part(p,.68,.84));
-    style(keyHost,'opacity',(1-ease(part(p,.67,.82))).toFixed(4));
-    style(keyHost,'transform',`translate3d(${(-arrival*width*.14).toFixed(2)}px,${(-arrival*height*.035).toFixed(2)}px,0) scale(${(1-.16*arrival).toFixed(4)})`);
+    const introScale=1+.25*(1-ease(part(p,.08,.22)));
+    style(keyHost,'opacity',(1-ease(part(arrival,.03,.35))).toFixed(4));
+    style(keyHost,'transform',`scale(${introScale.toFixed(4)})`);
     if(!ownsProduct){
-      style(product,'opacity',arrival.toFixed(4));style(product,'visibility',arrival>.001?'visible':'hidden');
-      style(product,'transform',`translate(-50%,-50%) translate3d(${((1-arrival)*width*.13).toFixed(2)}px,${((1-arrival)*65).toFixed(2)}px,0) rotateY(${(-12*(1-arrival)).toFixed(2)}deg) scale(${(.80+.20*arrival).toFixed(4)})`);
+      style(product,'opacity',ease(part(arrival,0,.18)).toFixed(4));style(product,'visibility',arrival>.001?'visible':'hidden');
+      style(product,'transformOrigin','0 0');
+      style(product,'transform',`matrix3d(${screenHandoffMatrix({keyBox:metrics.keyBox,productWidth:metrics.productWidth,viewportWidth:width,viewportHeight:height},arrival).join(',')})`);
+      style(productShell,'clipPath',`inset(0 0 ${(100*(1-1326/2160)*(1-ease(part(arrival,.15,1)))).toFixed(4)}% 0)`);
       if(product.inert!==(arrival<.985))product.inert=arrival<.985;
     }
     style(responseHeading,'opacity',ease(part(p,.76,.84)).toFixed(4));
@@ -139,7 +145,7 @@ function render(now){
   if(near(metrics.scores,y)||still)folio.render(poses.scores,still);
   journey.render(y,still,poses.scores);
   if(!still&&near(metrics.opening,y)&&p>.52)film.prepare();
-  film.setActive(!root.classList.contains('motion-off')&&!osReduced.matches&&(still||p>.72));
+  film.setActive(!root.classList.contains('motion-off')&&!osReduced.matches&&(still||p>=.84));
   if(!still&&y<metrics.opening.top+metrics.opening.height+height)prewarm();
   else if(still||y>metrics.opening.top+metrics.opening.height+height*2)releaseKey();
   data(root,'motionFrames',String(++renderCount));
@@ -155,6 +161,6 @@ osReduced.addEventListener('change',()=>{layoutDirty=true;schedule();});
 document.fonts.ready.then(()=>{layoutDirty=true;schedule();prewarm();});
 document.addEventListener('visibilitychange',()=>{hidden=document.hidden;if(hidden){cancelAnimationFrame(frame);frame=0;}else{lastTime=0;schedule();}});
 addEventListener('pagehide',()=>{releaseKey();releaseTrumpet();cancelAnimationFrame(frame);frame=0;bridge.dispose();journey.dispose();folio.dispose();film.dispose();});
-addEventListener('pageshow',event=>{if(event.persisted){folio=createScoreFolio(scoreAct);journey=createScoreJourney({music,scoreAct,demo});bridge=createProductBridge({product,bay,opening});film=createGameplayFilm(filmVideo,filmButton);}hidden=document.hidden;layoutDirty=true;schedule();});
+addEventListener('pageshow',event=>{if(event.persisted){folio=createScoreFolio(scoreAct);journey=createScoreJourney({music,scoreAct,demo});bridge=createProductBridge({product,bay,opening});film=createGameplayFilm(filmVideo,filmButton,{startTime:4.8});}hidden=document.hidden;layoutDirty=true;schedule();});
 document.querySelector('.scroll-cue')?.addEventListener('click',event=>{if(still)return;event.preventDefault();scrollTo({top:metrics.opening.top+metrics.opening.range*.22,behavior:'smooth'});});
 schedule();

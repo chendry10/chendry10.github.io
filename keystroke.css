@@ -1,0 +1,11 @@
+/* The opening is a shared photographic space, with room for the identity. */
+.relay-key{transform-origin:38% 50%;mask-image:linear-gradient(90deg,transparent,#000 24%,#000),linear-gradient(180deg,transparent,#000 9%,#000 90%,transparent);mask-composite:intersect}
+@media(max-width:700px){.relay-key{mask-image:linear-gradient(180deg,transparent,#000 8%,#000 88%,transparent)}}
+.concerto-stage .relay-product>figcaption{opacity:0;visibility:hidden}
+
+@media(max-width:700px){
+ html.concerto-still .concerto-stage{display:flex;flex-direction:column;min-height:0;height:auto;padding:118px 0 24px}
+ html.concerto-still .concerto-opening .hero-identity{position:relative;inset:auto;margin:0 22px;max-width:none}
+ html.concerto-still .relay-scene{position:relative;inset:auto;height:auto;margin-top:18px}
+ html.concerto-still .relay-key{position:relative;inset:auto}
+}
